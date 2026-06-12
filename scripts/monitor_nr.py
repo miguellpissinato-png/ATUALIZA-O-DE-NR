@@ -16,46 +16,18 @@ import anthropic
 
 # ── Configurações ──────────────────────────────────────────────────────────────
 
-# NRs a monitorar (você pode adicionar ou remover)
+# URL base atual do MTE para as NRs vigentes
+_BASE_URL = ("https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/"
+             "participacao-social/conselhos-e-orgaos-colegiados/"
+             "comissao-tripartite-partitaria-permanente/normas-regulamentadora/"
+             "normas-regulamentadoras-vigentes/norma-regulamentadora-no-{n}-nr-{n}")
+
+# NRs a monitorar (NR-01 a NR-38).
+# Obs: NR-02 e NR-27 estão revogadas, mas mantemos no monitoramento
+# (sem problema, o conteúdo da página simplesmente não deve mudar).
 NRS_MONITORADAS = {
-    "NR-01": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-01-disposicoes-gerais-e-gerenciamento-de-riscos-ocupacionais",
-    "NR-02": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-02-revogada-pela-portaria-mtp-no-2-583-de-10-de-outubro-de-2020",
-    "NR-03": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-03-embargo-e-interdicao",
-    "NR-04": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-04-servicos-especializados-em-seguranca-e-em-medicina-do-trabalho",
-    "NR-05": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-05-comissao-interna-de-prevencao-de-acidentes-e-assedio-cipa",
-    "NR-06": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-06-equipamento-de-protecao-individual-epi",
-    "NR-07": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-07-programa-de-controle-medico-de-saude-ocupacional",
-    "NR-08": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-08-edificacoes",
-    "NR-09": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-09-avaliacao-e-controle-das-exposicoes-ocupacionais-a-agentes-fisicos-quimicos-e-biologicos",
-    "NR-10": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-10-seguranca-em-instalacoes-e-servicos-em-eletricidade",
-    "NR-11": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-11-transporte-movimentacao-armazenagem-e-manuseio-de-materiais",
-    "NR-12": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-12-seguranca-no-trabalho-em-maquinas-e-equipamentos",
-    "NR-13": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-13-caldeiras-vasos-de-pressao-tubulacoes-e-tanques-metalicos-de-armazenamento",
-    "NR-14": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-14-fornos",
-    "NR-15": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-15-atividades-e-operacoes-insalubres",
-    "NR-16": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-16-atividades-e-operacoes-perigosas",
-    "NR-17": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-17-ergonomia",
-    "NR-18": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-18-seguranca-e-saude-no-trabalho-na-industria-da-construcao",
-    "NR-19": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-19-explosivos",
-    "NR-20": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-20-seguranca-e-saude-no-trabalho-com-inflamaveis-e-combustiveis",
-    "NR-21": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-21-trabalhos-a-ceu-aberto",
-    "NR-22": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-22-seguranca-e-saude-ocupacional-na-mineracao",
-    "NR-23": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-23-protecao-contra-incendios",
-    "NR-24": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-24-condicoes-sanitarias-e-de-conforto-nos-locais-de-trabalho",
-    "NR-25": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-25-residuos-industriais",
-    "NR-26": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-26-sinalizacao-de-seguranca",
-    "NR-27": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-27-revogada-pela-portaria-gm-no-262-de-29-de-maio-de-2008",
-    "NR-28": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-28-fiscalizacao-e-penalidades",
-    "NR-29": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-29-seguranca-e-saude-no-trabalho-portuario",
-    "NR-30": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-30-seguranca-e-saude-no-trabalho-aquaviario",
-    "NR-31": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-31-seguranca-e-saude-no-trabalho-na-agricultura-pecuaria-silvicultura-exploracao-florestal-e-aquicultura",
-    "NR-32": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-32-seguranca-e-saude-no-trabalho-em-estabelecimentos-de-saude",
-    "NR-33": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-33-seguranca-e-saude-nos-trabalhos-em-espacos-confinados",
-    "NR-34": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-34-condicoes-e-meio-ambiente-de-trabalho-na-industria-da-construcao-e-reparacao-naval",
-    "NR-35": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-35-trabalho-em-altura",
-    "NR-36": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-36-seguranca-e-saude-no-trabalho-em-empresas-de-abate-e-processamento-de-carnes-e-derivados",
-    "NR-37": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-37-seguranca-e-saude-em-plataformas-de-petroleo",
-    "NR-38": "https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/ctpp-nrs/normas-regulamentadoras-nrs/nr-38-seguranca-e-saude-no-trabalho-nas-atividades-de-limpeza-urbana-e-manejo-de-residuos-solidos",
+    f"NR-{i:02d}": _BASE_URL.format(n=i)
+    for i in range(1, 39)
 }
 
 ARQUIVO_HASHES = "data/hashes.json"
@@ -65,9 +37,9 @@ ARQUIVO_LOG    = "data/log.json"
 
 def buscar_conteudo_nr(url: str) -> str:
     """Baixa e extrai o texto principal da página de uma NR."""
-    headers = {"User-Agent": "Mozilla/5.0 (monitor-nr-bot/1.0)"}
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) monitor-nr-bot/1.0"}
     try:
-        resp = requests.get(url, headers=headers, timeout=30)
+        resp = requests.get(url, headers=headers, timeout=30, allow_redirects=True)
         resp.raise_for_status()
     except requests.RequestException as e:
         print(f"  Erro ao acessar {url}: {e}")
@@ -76,11 +48,18 @@ def buscar_conteudo_nr(url: str) -> str:
     soup = BeautifulSoup(resp.text, "html.parser")
 
     # Remove menus, scripts e rodapés
-    for tag in soup(["script", "style", "nav", "footer", "header"]):
+    for tag in soup(["script", "style", "nav", "footer", "header", "aside"]):
         tag.decompose()
 
-    # Tenta pegar o conteúdo principal
-    main = soup.find("main") or soup.find("article") or soup.find("div", class_="content")
+    # Tenta vários seletores comuns do portal gov.br, do mais específico ao mais genérico
+    main = (
+        soup.find("div", id="parent-fieldname-text")
+        or soup.find("div", class_="documentByLine")
+        or soup.find("main")
+        or soup.find("article")
+        or soup.find("div", class_="content")
+        or soup.find("div", id="content")
+    )
     texto = (main or soup).get_text(separator="\n", strip=True)
 
     # Remove linhas muito curtas (menus, breadcrumbs etc.)
