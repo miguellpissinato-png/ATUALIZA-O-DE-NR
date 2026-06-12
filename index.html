@@ -48,7 +48,7 @@
 
     main {
       width: 100%;
-      max-width: 1100px;
+      max-width: 1200px;
       margin: -24px auto 40px;
       padding: 0 16px;
     }
@@ -98,13 +98,19 @@
       margin: 24px 0 12px;
     }
 
+    .table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      border-radius: 14px;
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
       background: var(--card);
-      border-radius: 14px;
       overflow: hidden;
-      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+      min-width: 850px;
     }
 
     th, td {
@@ -112,6 +118,7 @@
       border-bottom: 1px solid var(--border);
       text-align: left;
       font-size: 14px;
+      vertical-align: top;
     }
 
     th {
@@ -140,6 +147,7 @@
       border-radius: 999px;
       font-size: 12px;
       font-weight: 700;
+      white-space: nowrap;
     }
 
     .badge-ok {
@@ -155,6 +163,11 @@
     .badge-warning {
       background: #fef3c7;
       color: #92400e;
+    }
+
+    .badge-danger {
+      background: #fee2e2;
+      color: #991b1b;
     }
 
     .log-list {
@@ -205,10 +218,6 @@
         font-size: 23px;
       }
 
-      table {
-        font-size: 13px;
-      }
-
       th, td {
         padding: 10px;
       }
@@ -249,20 +258,25 @@
 
     <section>
       <h2 class="section-title">NRs encontradas</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>NR</th>
-            <th>Status</th>
-            <th>Link oficial</th>
-          </tr>
-        </thead>
-        <tbody id="tabela-nrs">
-          <tr>
-            <td colspan="3">Carregando NRs...</td>
-          </tr>
-        </tbody>
-      </table>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>NR</th>
+              <th>Status</th>
+              <th>Data encontrada no Gov.br/PDF</th>
+              <th>Última verificação</th>
+              <th>Link oficial</th>
+            </tr>
+          </thead>
+          <tbody id="tabela-nrs">
+            <tr>
+              <td colspan="5">Carregando NRs...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </section>
 
     <div id="erro" class="error" style="display: none;"></div>
@@ -298,11 +312,25 @@
       });
     }
 
+    function formatarDataOficial(dataISO) {
+      if (!dataISO) return "não localizada";
+
+      const data = new Date(dataISO);
+
+      if (isNaN(data.getTime())) {
+        return dataISO;
+      }
+
+      return data.toLocaleDateString("pt-BR");
+    }
+
     function nomeEvento(evento) {
       const nomes = {
         "primeiro_registro": "Primeiro registro",
         "alteracao_detectada": "Alteração detectada",
-        "erro_sem_conteudo": "Erro ao obter conteúdo"
+        "erro_sem_conteudo": "Erro ao obter conteúdo",
+        "sem_alteracoes": "Sem alterações",
+        "monitorada": "Monitorada"
       };
 
       return nomes[evento] || evento || "Evento";
@@ -310,24 +338,57 @@
 
     function classeBadge(evento) {
       if (evento === "alteracao_detectada") return "badge-warning";
-      if (evento === "erro_sem_conteudo") return "badge-warning";
+      if (evento === "erro_sem_conteudo") return "badge-danger";
+      if (evento === "primeiro_registro") return "badge-info";
       return "badge-ok";
+    }
+
+    function obterUltimaAtualizacao(statusNrs, logs) {
+      const datas = [];
+
+      if (Array.isArray(statusNrs)) {
+        for (const item of statusNrs) {
+          if (item.ultima_verificacao) {
+            datas.push(item.ultima_verificacao);
+          }
+        }
+      }
+
+      if (Array.isArray(logs)) {
+        for (const item of logs) {
+          if (item.data) {
+            datas.push(item.data);
+          }
+        }
+      }
+
+      if (datas.length === 0) {
+        return "--";
+      }
+
+      datas.sort((a, b) => new Date(b) - new Date(a));
+
+      return formatarData(datas[0]);
     }
 
     async function iniciarPainel() {
       const erro = document.getElementById("erro");
 
       try {
-        const [links, logs] = await Promise.all([
+        const [links, logs, statusNrs] = await Promise.all([
           carregarJSON("data/links_nrs.json"),
-          carregarJSON("data/log.json")
+          carregarJSON("data/log.json").catch(() => []),
+          carregarJSON("data/status_nrs.json").catch(() => [])
         ]);
 
-        const totalNrs = Object.keys(links).length;
+        const listaStatus = Array.isArray(statusNrs) ? statusNrs : [];
+        const listaLogs = Array.isArray(logs) ? logs : [];
+
+        const totalNrs = listaStatus.length || Object.keys(links).length;
         document.getElementById("total-nrs").textContent = totalNrs;
 
-        const alteracoes = logs.filter(item => item.evento === "alteracao_detectada");
-        const erros = logs.filter(item => item.evento === "erro_sem_conteudo");
+        const alteracoes = listaStatus.filter(item => item.status === "alteracao_detectada");
+        const erros = listaStatus.filter(item => item.status === "erro_sem_conteudo");
 
         const statusGeral = document.getElementById("status-geral");
 
@@ -342,29 +403,29 @@
           statusGeral.className = "big-number status-ok";
         }
 
-        if (logs.length > 0) {
-          document.getElementById("ultima-atualizacao").textContent = formatarData(logs[0].data);
-        }
+        document.getElementById("ultima-atualizacao").textContent =
+          obterUltimaAtualizacao(listaStatus, listaLogs);
 
-        montarTabelaNrs(links, logs);
-        montarLogs(logs);
+        montarTabelaNrs(links, listaLogs, listaStatus);
+        montarLogs(listaLogs);
 
       } catch (e) {
         erro.style.display = "block";
         erro.innerHTML = `
           <strong>Erro ao carregar o painel.</strong><br>
-          Verifique se existem os arquivos <code>data/links_nrs.json</code> e <code>data/log.json</code>.
+          Verifique se existem os arquivos <code>data/links_nrs.json</code> e <code>data/status_nrs.json</code>.
           <br><br>
           Detalhe: ${e.message}
         `;
       }
     }
 
-    function montarTabelaNrs(links, logs) {
+    function montarTabelaNrs(links, logs, statusNrs) {
       const tbody = document.getElementById("tabela-nrs");
       tbody.innerHTML = "";
 
       const ultimoEventoPorNr = {};
+      const statusPorNr = {};
 
       for (const log of logs) {
         if (!ultimoEventoPorNr[log.nr]) {
@@ -372,19 +433,34 @@
         }
       }
 
-      for (const [nr, url] of Object.entries(links)) {
+      for (const item of statusNrs) {
+        if (item.nr) {
+          statusPorNr[item.nr] = item;
+        }
+      }
+
+      const nrsOrdenadas = Object.keys(links).sort();
+
+      for (const nr of nrsOrdenadas) {
+        const statusItem = statusPorNr[nr];
         const log = ultimoEventoPorNr[nr];
-        const evento = log ? log.evento : "monitorada";
+
+        const url = statusItem?.url || links[nr];
+        const status = statusItem?.status || log?.evento || "monitorada";
+        const dataOficial = statusItem?.data_oficial || log?.data_oficial;
+        const ultimaVerificacao = statusItem?.ultima_verificacao || log?.data;
 
         const tr = document.createElement("tr");
 
         tr.innerHTML = `
           <td><strong>${nr}</strong></td>
           <td>
-            <span class="badge ${classeBadge(evento)}">
-              ${nomeEvento(evento)}
+            <span class="badge ${classeBadge(status)}">
+              ${nomeEvento(status)}
             </span>
           </td>
+          <td>${dataOficial ? formatarDataOficial(dataOficial) : "não localizada"}</td>
+          <td>${ultimaVerificacao ? formatarData(ultimaVerificacao) : "--"}</td>
           <td><a href="${url}" target="_blank" rel="noopener">Abrir no Gov.br</a></td>
         `;
 
@@ -409,12 +485,12 @@
 
         div.innerHTML = `
           <strong>${item.nr || "NR"} — ${nomeEvento(item.evento)}</strong>
-         <div class="muted">
-  Data informada pelo Gov.br: ${item.data_oficial ? formatarData(item.data_oficial) : "não informada"}
-</div>
-<div class="muted">
-  Detectado pelo monitor: ${formatarData(item.data)}
-</div>
+          <div class="muted">
+            Data encontrada no Gov.br/PDF: ${item.data_oficial ? formatarDataOficial(item.data_oficial) : "não localizada"}
+          </div>
+          <div class="muted">
+            Detectado pelo monitor: ${formatarData(item.data)}
+          </div>
           ${item.resumo ? `<p>${item.resumo}</p>` : ""}
           ${item.url ? `<a href="${item.url}" target="_blank" rel="noopener">Abrir link oficial</a>` : ""}
         `;
