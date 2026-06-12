@@ -220,14 +220,35 @@ def extrair_texto_html(html_bruto: str) -> str:
     return normalizar_texto(texto)
 
 
-def buscar_conteudo_nr(url: str) -> str:
+def buscar_conteudo_nr(url: str) -> tuple[str, str | None]:
+    """
+    Baixa e extrai texto de uma NR.
+    Também tenta capturar a data oficial de última modificação informada pelo Gov.br.
+    """
     try:
         resp = requests.get(url, headers=HEADERS, timeout=45, allow_redirects=True)
         resp.raise_for_status()
     except requests.RequestException as e:
         print(f"    ⚠️ Erro ao acessar {url}: {e}")
-        return ""
+        return "", None
 
+    data_oficial = resp.headers.get("Last-Modified")
+
+    content_type = resp.headers.get("Content-Type", "").lower()
+    url_final = resp.url.lower()
+
+    if "application/pdf" in content_type or url_final.endswith(".pdf"):
+        try:
+            return extrair_texto_pdf(resp.content), data_oficial
+        except Exception as e:
+            print(f"    ⚠️ Erro ao ler PDF: {e}")
+            return "", data_oficial
+
+    try:
+        return extrair_texto_html(resp.text), data_oficial
+    except Exception as e:
+        print(f"    ⚠️ Erro ao ler HTML: {e}")
+        return "", data_oficial
     content_type = resp.headers.get("Content-Type", "").lower()
     url_final = resp.url.lower()
 
