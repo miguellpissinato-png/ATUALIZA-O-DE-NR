@@ -514,7 +514,7 @@ def main():
         print(f"  Verificando {nr}...")
         print(f"    URL: {url}")
 
-        conteudo_atual = buscar_conteudo_nr(url)
+        conteudo_atual, data_oficial = buscar_conteudo_nr(url)
 
         if not conteudo_atual:
             print(f"    ⚠️ Sem conteúdo para {nr}. Pulando.")
