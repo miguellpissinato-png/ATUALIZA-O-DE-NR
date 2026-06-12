@@ -1,0 +1,100 @@
+Info
+Norma Regulamentadora No. 20 (NR-20)
+Compartilhe:
+Compartilhe por Facebook
+Compartilhe por Twitter
+Compartilhe por LinkedIn
+Compartilhe por WhatsApp
+link para Copiar para área de transferência
+Publicado em
+22/10/2020 16h14
+Atualizado em
+27/01/2025 15h18
+A norma regulamentadora foi originalmente editada pela
+Portaria MTb nº 3.214
+, de 08 de junho de 1978, sob o título “Combustíveis Líquidos e Inflamáveis”, de forma a regulamentar o
+inciso II do artigo 200 da CLT
+,
+conforme redação dada pela
+Lei n.º 6.514
+, de 22 de dezembro de 1977.
+A Norma Regulamentadora nº 20 (NR-20), conforme classificação estabelecida na
+Portaria SIT n° 787
+, de 29 de novembro de 2018, é norma especial, posto que regulamenta a execução do trabalho com inflamáveis e combustíveis, considerando as atividades, instalações e equipamentos utilizados, sem estar condicionada a setores ou atividades econômicas específicas..
+Desde a sua publicação, a norma passou por seis alterações, sendo quatro alterações pontuais e duas revisões amplas. A primeira revisão da NR-20 foi aprovada na
+67ª Reunião Ordinária
+da
+Comissão Tripartite Paritária Permanente
+(CTPP)*, realizada em 28 e 29 de novembro de 2011, e publicada pela
+Portaria SIT nº 308
+, de 29 de fevereiro de 2012. Essa Portaria deu nova redação à NR-20 e criou também a
+Comissão Nacional Tripartite Temática
+(CNTT) da NR-20, com o objetivo de incentivar a realização de estudos e debates, visando ao aprimoramento da legislação.
+Posteriormente a essa primeira grande revisão, a
+Portaria MTb n° 872
+, de 06 de julho de 2017, realizou uma importante alteração no texto: inseriu a possibilidade de adoção da modalidade de ensino a distância (EaD) e semipresencial para as capacitações previstas na norma. Para se chegar ao texto final, foi formada uma subcomissão tripartite, ligada à CNTT da NR-20, que acompanhou a implementação, em uma empresa brasileira de transporte de combustíveis, de projeto piloto de utilização da modalidade de ensino a distância e semipresencial para as capacitações previstas na NR-20. O trabalho envolveu a análise do projeto pedagógico e dos materiais utilizados, bem como entrevistas aos trabalhadores submetidos a essa modalidade de capacitação.
+Após análises, recomendações de melhorias e intensos debates do projeto piloto pela referida subcomissão, foi constatada a viabilidade da utilização dessa metodologia de aprendizagem – EaD – no âmbito do fornecimento da parte teórica das capacitações preconizadas pela NR-20, o que resultou na elaboração do texto normativo.
+O texto aprovado estabeleceu diretrizes e requisitos mínimos para utilização da modalidade de ensaio à distância e semipresencial para as capacitações previstas na NR-20, notadamente, requisitos operacionais, administrativos, tecnológicos e de estruturação pedagógica.
+Foi essa construção normativa da NR-20 que serviu de base para a modificação da Norma Regulamentadora n° 01 – Disposições Gerais, publicada por meio da
+Portaria SEPRT nº 915
+, de 30 de julho de 2019, possibilitando a adoção dessa modalidade de ensino às demais normas regulamentadoras.
+Em 2019, na
+96ª Reunião Ordinária
+da CTPP, realizada em 19 e 20 de março, foi discutido um cronograma de atividades para a revisão de diversas normas regulamentadoras. Na sua
+97ª Reunião Ordinária
+, realizada em 04 e 05 de junho de 2019, a CTPP acordou o calendário de revisão de normas regulamentadoras para o segundo semestre daquele ano, tendo a NR-20 sido pautada para discussão na reunião da CTPP programada para 25 e 26 de setembro de 2019.
+Iniciaram-se, então, reuniões bipartites entre a bancada de governo e de trabalhadores e de governo e de empregadores, considerando as propostas de cada bancada, bem como a proposta construída ao longo dos anos de discussão na CNTT da NR-20.
+Na sequência, a bancada de governo construiu uma proposta, levando em consideração o texto vigente da NR-20, as alterações que já vinham sendo discutidas no âmbito da então já extinta CNTT**, as sugestões encaminhadas por empregadores e trabalhadores, e ainda as diretrizes da nova gestão administrativa. Essa nova proposta foi encaminhada, por fim, para discussão pelo grupo tripartite que antes integrava a CNTT da NR-20.
+Em duas reuniões presenciais, realizadas no período de 20 a 23 de agosto e de 04 a 06 de setembro de 2019, o referido grupo tripartite deliberou sobre a proposta apresentada pelo grupo de governo, obtendo consenso para a maior parte do texto. O texto acordado, bem como os pontos ainda divergentes, foram encaminhados para discussão na CTPP, a qual, em sua
+2ª Reunião Ordinária
+*, realizada em 25 e 26 de setembro de 2019,
+aprovou por consenso
+o texto final da NR-20. O texto foi publicado na
+Portaria SEPRT nº 1.360
+, de 09 de dezembro de 2019.
+Assim, o texto revisado da NR-20 foi discutido de forma tripartite, sendo que em sua elaboração foi aplicada a tríade de simplificação, harmonização e desburocratização, conforme pontos abaixo destacados, sem prejuízo na segurança e saúde no trabalho:
+Simplificação
+:
+Projeto da Instalação (item 20.5 do texto anterior): com a exclusão das alíneas ‘d’ e ‘h’ do item 20.5.2, o item tornou-se aplicável às três classes de instalações, o que possibilitou a exclusão do subitem 20.5.2.1, que só se aplicava a instalações de classe I;
+Plano de manutenção em sistema eletrônico (item 20.8.5 do texto anterior): documentação do plano de inspeção e manutenção contemplado pela nova redação do 20.8.1;
+Exclusão das alíneas do item 20.8.8: permissão de trabalho, remetendo para análise de risco;
+Plano de resposta à emergência (item 20.14 do texto anterior): simplificação das alíneas, remetendo sua elaboração para normas técnicas aplicáveis; e
+Tanque de inflamáveis: conteúdo transferido para anexo.
+Harmonização
+:
+Exclusão do item 20.5.4 sobre sistemas pressurizados (são tratados na NR-13);
+Exclusão do item 20.7.3 por ser tratado no Anexo nº 2 - Exposição Ocupacional ao Benzeno em Postos Revendedores de Combustíveis da Norma Regulamentadora nº 09 (NR-09) – Programa de Prevenção de Riscos Ambientais e também pela redundância com o item 20.5.7 da própria NR-20;
+Manutenção e inspeção: exclusão do subitem 20.8.3.1 (manuais em português) – disposição já contida no item 12.13 da nova Norma Regulamentadora nº 12 (NR-12) – Segurança no Trabalho em Máquinas e Equipamentos; e exclusão da alínea ‘a” do item 20.8.2 – disposição já está tratada na NR-12 e na Norma Regulamentadora nº 13 (NR-13) – Caldeiras, Vasos de Pressão, Tubulações e Tanques Metálicos de Armazenamento;
+Retirada das alíneas do item 20.8.8 (texto anterior): disposições já previstas em outras normas (Norma Regulamentadora nº 10 (NR-10) – Segurança em Instalações e Serviços em Eletricidade; Norma Regulamentadora nº 33 (NR-33) – Segurança e Saúde nos Trabalhos em Espacos Confinados; e Norma Regulamentadora nº 35 (NR-35) – Trabalho em Altura);
+Nova estrutura para a capacitação, com adequação da carga horária; e
+Exclusão dos itens 20.20.1 e 20.20.2: o direito de recusa já está previsto na NR-01.
+Desburocratização
+:
+Retirada de documentos, como fluxograma de processo, por não ser comum a todas as instalações e não estar diretamente relacionado com segurança e saúde no trabalho;
+Retirada da exigência de uma série de itens obrigatórios para permissão de trabalho (20.8.8), pois a análise de risco deve determinar o que precisa estar na permissão de trabalho;
+Item 20.10.2: prevê que somente nas instalações classes II e III a análise precisa ser realizada por profissional habilitado, complementado pela inteligência do item 20.10.3, que permite que a análise preliminar de perigos/riscos das classes I possa ser elaborada por outros profissionais, como Técnico de Segurança do Trabalho; e
+Alteração da periodicidade das análises de risco, retirando a referência à legislação ambiental, sendo definidas na própria NR-20 as periodicidades de revisão.
+*
+A CTPP, originalmente instituída pela
+Portaria SSST nº 2
+, em 10 de abril de 1996, foi extinta pelo
+Decreto nº 9.759
+, de 11 de abril de 2019, e recriada pelo
+Decreto nº 9.944
+, de 30 de julho de 2019, sendo que as atas das reuniões realizadas após 30 de julho de 2019 iniciaram uma nova numeração.
+**
+As Comissões Nacionais Tripartites Temáticas foram extintas pelo
+Decreto nº 9.759
+, de 11 de abril de 2019.
+NR-20 - SEGURANÇA E SAÚDE NO TRABALHO COM INFLAMÁVEIS E COMBUSTÍVEIS
+(Última modificação:
+Portaria MTE nº 60, de 21 de janeiro de 2025
+)
+Publicações e Manuais
+Perguntas e Respostas sobre a NR-20
+Compartilhe:
+Compartilhe por Facebook
+Compartilhe por Twitter
+Compartilhe por LinkedIn
+Compartilhe por WhatsApp
+link para Copiar para área de transferência

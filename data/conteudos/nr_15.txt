@@ -1,0 +1,138 @@
+Info
+Norma Regulamentadora No. 15 (NR-15)
+Compartilhe:
+Compartilhe por Facebook
+Compartilhe por Twitter
+Compartilhe por LinkedIn
+Compartilhe por WhatsApp
+link para Copiar para área de transferência
+Publicado em
+22/10/2020 16h06
+Atualizado em
+05/12/2025 17h43
+A norma regulamentadora foi originalmente editada pela
+Portaria MTb nº 3.214
+, de 8 de junho de 1978, estabelecendo as “Atividades e Operações Insalubres”, de forma a regulamentar os artigos
+189 a 196
+da Consolidação das Leis do Trabalho - CLT, conforme redação dada pela
+Lei nº 6.514
+, de 22 de dezembro de 1977, que alterou o Capítulo V (da Segurança e da Medicina do Trabalho) da CLT .
+A NR-15 estabelece as atividades que devem ser consideradas insalubres, gerando direito ao adicional de insalubridade aos trabalhadores. É composta de uma parte geral e mantém 13 anexos, que definem os Limites de Tolerância para agentes físicos, químicos e biológicos, quando é possível quantificar a contaminação do ambiente, ou listando ou mencionando situações em que o trabalho é considerado insalubre qualitativamente.
+Segundo o histórico coletado pela Fundacentro, os diversos aspectos técnicos do texto normativo foram discutidos e elaborados, à época, pelos então técnicos de Higiene Ocupacional da Fundacentro.
+Os Limites de Tolerância determinados na norma tiveram como base os valores de
+Threshold Limits Values - TLV
+do texto da
+American Conference of Governmental Industrial Hygienists – ACGIH
+– versão de 1976. Como os limites norte-americanos diziam respeito a jornadas semanais de 40 horas, os valores foram adaptados para a jornada oficial brasileira, de 48 horas semanais (vigente naquele momento), por meio de cálculos matemáticos.
+Por se tratar de uma norma regulamentadora de definições, nunca foi criada
+Comissão Nacional Temática Tripartite
+para acompanhamento dessa norma.
+A parte geral da norma é caracterizada como Norma Especial pela
+Portaria SIT nº 787
+, de 28 de novembro de 2018, vez que regulamenta a execução do trabalho considerando as atividades, instalações ou equipamentos empregados, sem estarem condicionadas a setores ou atividades econômicos específicos.
+Os anexos da NR-15 tratam da exposição dos trabalhadores a ruído, calor ambiente, radiações ionizantes, trabalho sob condições hiperbáricas, radiações não ionizantes, vibrações, frio, umidade, agentes químicos (incluindo benzeno), poeiras minerais (incluindo sílica, asbesto e manganês), além dos agentes biológicos.
+A avaliação quantitativa de agentes aos quais o trabalhador está exposto exige a determinação da intensidade, no caso de agentes físicos, e da concentração ambiental, no caso dos agentes químicos. Devem ser realizadas avaliações quantitativas para ruído contínuo (Anexos n°s 1 e 2), calor (Anexo n° 3), radiações ionizantes (Anexo n° 5), vibração (Anexo n° 8), agentes químicos (Anexo n° 11) e poeiras minerais (Anexo n° 12).
+O texto da NR-15 sofreu diversas alterações pontuais ao longo de mais de 40 anos de vigência, como se segue:
+Portaria SSMT n.º 12, de 12 de novembro de 1979, publicada no DOU de 23/11/79 (alterações no Anexo n° 14 - Agentes Biológicos);
+Portaria SSMT n.º 01, de 17 de abril de 1980, publicada no DOU de 25/04/80 (inclusão de trabalho sob vibrações em conveses de navios como atividade insalubre);
+Portaria SSMT n.º 05, de 09 de fevereiro de 1983, publicada no DOU de 17/02/83 (detalhamento de trabalhos sob ar comprimido e dos trabalhos submersos);
+Portaria SSMT n.º 12, de 06 de junho de 1983, publicada no DOU de 14/06/83 (revogada pela Portaria SEPRT n.º 1.067, de 23 de setembro de 2019 (DOU de 24/09/19);
+Portaria SSMT n.º 24, de 14 de setembro de 1983, publicada no DOU de 15/09/83 (aborda “Trabalho Sob Condições Hiperbáricas”);
+Portaria MTE n.º 3.751, de 23 de novembro de 1990, publicada no DOU de 26/11/90 (introdução de alterações na NR-17, especialmente, no caso da NR-15, sobre iluminação no trabalho);
+Portaria DSST n.º 01, de 28 de maio de 1991, publicada no DOU de 29/05/91 (altera o Anexo nº 12 da NR-15, que institui os "limites de tolerância para poeiras minerais" – asbestos);
+Portaria DNSST n.º 08, de 05 de outubro de 1992, publicada no DOU de 08/10/92 (inclui no Anexo n° 2 da NR-15 as operações com manganês e seus compostos e revigora o item sílica livre cristalizada);
+Portaria DNSST n.º 09, de 05 de outubro de 1992, publicada no DOU de 14/10/92 (inclui no Anexo n° 11 da NR-15 o agente químico Negro de Fumo, no quadro n.º 1 - Tabela de Limites de Tolerância);
+Portaria SSST n.º 04, de 11 de abril de 1994, publicada no DOU de 14/04/94 (altera o Anexo n° 5 sobre radiações ionizantes);
+Portaria SSST n.º 22, de 26 de dezembro de 1994, publicada no DOU de 27/12/94 (altera a redação do item 12.1 do Anexo n° 12 - Limites de Tolerância para Poeiras Minerais – Asbestos);
+Portaria SSST n.º 14, de 20 de dezembro de 1995, publicada no DOU de 22/12/95 (altera o item "Substâncias Cancerígenas" do Anexo n° 13 e inclui o Anexo n° 13-A – Benzeno);
+Portaria SIT n.º 99, de 19 de outubro de 2004, publicada no DOU de 21/10/04 (inclui no Anexo nº 12 da NR-15 a proibição do processo de trabalho de jateamento que utilize areia seca ou úmida);
+Portaria SIT n.º 43, de 11 de março de 2008, republicada no DOU de 13/03/08 (inclui no Anexo n° 12 da NR-15 previsão de que nos processos de corte e acabamento de rochas ornamentais devem ser adotados sistemas de umidificação);
+Portaria SIT n.º 203, de 28 de janeiro de 2011, publicada no DOU de 01/02/11 (altera os itens 3, 4 e 5 do Anexo n° 13-A - Benzeno);
+Portaria SIT n.º 291, de 08 de dezembro de 2011, publicada no DOU de 09/12/11 (altera o Anexo n° 13-A - Benzeno);
+Portaria MTE n.º 1.297, de 13 de agosto de 2014, publicada no DOU de 14/08/14 (altera o Anexo n° 8 – Vibração);
+Portaria MTb n.º 1.084, de 18 de dezembro de 2018, publicada no DOU de 19/12/18(altera o Anexo n° 5 - Radiações Ionizantes);
+Portaria SEPRT n.º 1.359, de 09 de dezembro de 2019, publicada no DOU de 11/12/19 (altera o Anexo nº 3 - Limites de Tolerância para Exposição ao Calor).
+Discussões na CTPP
+Após a criação da Comissão Tripartite Paritária Permanente (CTPP), em 1996 (
+Portaria SSST n° 2
+, de 10 de abril de 1996), todas as alterações de normas regulamentadoras passaram a ser aprovadas em ambiente tripartite, com a participação de representantes dos empregadores, trabalhadores e governo.
+Texto geral da NR-15
+Devido à falta de atualização ampla da NR-15, a demanda pela revisão geral da norma foi apresentada na CTPP. Essa discussão iniciou-se em 2010, com a formação de um Grupo Técnico (GT), formado por Auditores-Fiscais do Trabalho e Técnicos da Fundacentro, com o objetivo de elaborar proposta de texto de revisão da parte geral da norma.
+Na
+69ª Reunião Ordinária
+da CTPP, realizada em 12 e 13 de junho de 2012, o coordenador da bancada de governo informou a finalização da proposta de texto básico, construída pelo GT. Em 28 de agosto de 2012, foi publicada a
+Portaria SIT nº 332
+, divulgando para consulta pública, durante o prazo de 60 (sessenta) dias, a proposta de texto de revisão.
+Em virtude das discussões que foram iniciadas a respeito de uma norma regulamentadora sobre a gestão da segurança e saúde no trabalho, os trabalhos do GT de revisão da NR15 foram suspensos. Houve novas tentativas de discussão para alteração do texto geral da NR-15, no entanto, foram priorizadas alterações nos anexos da norma.
+Em virtude disso, a NR-15 foi inserida na agenda normativa da CTPP, para alteração em 2020.
+Última alteração de anexo da NR-15
+Conforme histórico de alterações da NR-15 acima listado, a alteração mais recente da NR-15 (Anexo n° 3 - Limites de Tolerância para Exposição ao Calor) data de 2019. Para se chegar à aprovação desse texto, é importante fazer um histórico do percurso trilhado até o momento da sua aprovação.
+Conforme mencionado, a discussão para alteração do texto geral da NR-15 iniciou-se em 2010, ficando decidido naquele momento que seriam formados GT para elaboração de propostas de texto para os anexos da NR-15, incluindo o tema “calor”.
+Dessa forma, em 2013, foi constituído GT para elaborar proposta de texto de revisão do anexo de calor. A proposta foi elaborada e, em 20 de dezembro de 2013, o texto foi disponibilizado para consulta pública, durante 60 (sessenta dias), por meio da
+Portaria SIT nº 414
+, de 19 de dezembro de 2013.
+Após a consulta pública, e considerando a então recente publicação da
+Portaria MTE nº 1.297, de 13 de agosto de 2014
+, (que revisou o Anexo nº 8 da NR-15, no que diz respeito aos aspectos de insalubridade da exposição à vibração, e simultaneamente inseriu o Anexo nº 1 na Norma Regulamentadora n° 09 - Programa de Prevenção de Riscos Ambientais, de forma a abordar as questões de prevenção correlatas a esse risco ocupacional), foi elaborada proposta de governo com estrutura similar: inclusão de anexo na NR-09, tratando das questões de prevenção, e alteração do Anexo nº 3 da NR-15, tratando propriamente da insalubridade. Contudo, àquela época, o texto não obteve consenso na CTPP.
+Em 2019, a CTPP decidiu dar continuidade à revisão do Anexo nº 3 da NR-15, optando-se por aprofundar a discussão sobre o tema. Foi acordada, então, a formação de um Grupo de Estudo Tripartite (GET), sendo estabelecida a realização de, no máximo, três reuniões para conclusão dos trabalhos do GET, em razão de todo o trabalho anterior que já havia sido construído. O Grupo foi constituído pela
+Portaria SIT nº 676
+, de 24 de novembro de 2017, com a primeira reunião realizada em novembro/2017 e a terceira (e última) em abril/2019.
+Ainda em 2019, a CTPP aprovou um novo cronograma de atividades para a conclusão da revisão do anexo de calor. Nesse sentido, na
+97ª Reunião Ordinária
+da CTPP, realizada em 04 e 05 de junho de 2019, ficou definido que a proposta de texto de revisão do Anexo nº 3 da NR-15 seria discutida na reunião a ser realizada em 17 e 18 de setembro de 2019 (alterada posteriormente para 25 e 26 de setembro de 2019).
+Com essas datas acertadas, foi formado um novo grupo tripartite, a fim de discutir a proposta de texto construída pelo GT e apresentada durante a realização do GET. Foram realizadas duas reuniões desse grupo: a primeira em agosto/2019 (dias 06 e 07) e a segunda em setembro/2019 (dias 03, 04 e 05).
+A proposta de texto final manteve a estrutura original de inclusão de anexo na NR-09, no que diz respeito às medidas de prevenção, e de revisão do Anexo nº 3 (limites de tolerância para exposição ao calor) da NR-15. A proposta final elaborada pelo grupo tripartite foi então apresentada à CTPP e discutida durante a 2ª Reunião Ordinária (nova numeração, após o Decreto 9944/2019), realizada em 25 e 26 de setembro, momento no qual foi aprovada por consenso a inclusão de anexo na NR-09 no que tange às medidas de prevenção com relação à exposição ocupacional ao calor. Quanto à revisão do Anexo nº 3 da NR-15, não houve consenso em alguns poucos itens do texto apresentado. No total, houve consenso em 93% dos itens dos dois anexos.
+O texto aprovado foi publicado pela
+Portaria SEPRT n° 1.359
+, de 09 de dezembro de 2019, com vigência imediata.
+Cabe destacar que o conteúdo do novo Anexo n° 3 da NR-15 foi construído em harmonia com a
+Norma de Higiene Ocupacional - NHO 06
+da Fundacentro, revisada em 2017, que trata da avaliação da exposição ocupacional ao calor.
+Além disso, houve uma atualização dos critérios estabelecidos para a caracterização das atividades ou operações como insalubres decorrentes da exposição ocupacional ao calor. Por exemplo, foi resolvida a falta de harmonia que existia entre os Quadros 2 e 3 do Anexo nº 3 e aqueles da NHO 06, passando a ser utilizados os quadros de limite de exposição ocupacional ao calor e da taxa metabólica por tipo de atividade da NHO 06, com base em critérios técnicos que foram atualizados.
+*
+A CTPP foi extinta pelo
+Decreto 9.759
+, de 11 de abril de 2019, e recriada pelo
+Decreto 9944
+, de 30 de julho de 2019. As atas das reuniões realizadas após 30 de julho de 2019 iniciaram uma nova numeração.
+NR-15 - ATIVIDADES E OPERAÇÕES INSALUBRES
+(
+Última modificação:
+Portaria MTE nº 2.021, de 03 de dezembro de 2025
+)
+NR-15 - ANEXO 1 - LIMITES DE TOLERÂNCIA PARA RUÍDO CONTÍNUO OU INTERMITENTE
+NR-15 - ANEXO 2 - LIMITES DE TOLERÂNCIA PARA RUÍDOS DE IMPACTO
+NR-15 - ANEXO 3 - LIMITES DE TOLERÂNCIA PARA EXPOSIÇÃO AO CALOR
+(Última modificação:
+Portaria MTP n° 426, de 07 de outubro de 2021
+) - VER
+TEXTO DA NR-15
+NR-15 - ANEXO 4 - (REVOGADO)
+NR-15 - ANEXO 5 - RADIAÇÕES IONIZANTES
+(Última modificação: Portaria MTB 1084, DE 18/12/2018)
+NR-15 - ANEXO 6 - TRABALHO SOB CONDIÇÕES HIPERBÁRICAS
+(Última modificação: Portaria SSMT 24, DE 14/09/1983)
+NR-15 - ANEXO 7 - RADIAÇÕES NÃO-IONIZANTES
+NR-15 - ANEXO 8 - VIBRAÇÃO
+(Última modificação:
+Portaria MTP n° 426, de 07 de outubro de 2021
+) - VER
+TEXTO DA NR-15
+NR-15 - ANEXO 9 - FRIO
+NR-15 - ANEXO 10 - UMIDADE
+NR-15 - ANEXO 11 - AGENTES QUÍMICOS CUJA INSALUBRIDADE É CARACTERIZADA POR LIMITE DE TOLERÂNCIA E INSPEÇÃO NO LOCAL DE TRABALHO
+NR-15 - ANEXO 12 - LIMITES DE TOLERÂNCIA PARA POEIRAS MINERAIS
+(Última modificação: Portaria SSST 1, DE 28/05/1991)
+NR-15 - ANEXO 13 - AGENTES QUÍMICOS
+NR-15 - ANEXO 13A - BENZENO
+(Última modificação: Portaria
+MTP nº 806, de 13 de abril de 2022
+)
+NR-15 - ANEXO 14 - AGENTES BIOLÓGICOS
+(Última modificação: Portaria SSST 12, 12/11/1979)
+Compartilhe:
+Compartilhe por Facebook
+Compartilhe por Twitter
+Compartilhe por LinkedIn
+Compartilhe por WhatsApp
+link para Copiar para área de transferência
