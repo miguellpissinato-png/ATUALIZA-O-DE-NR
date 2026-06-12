@@ -535,12 +535,13 @@ def main():
             hashes_atualizados[nr] = hash_atual
             salvar_conteudo_nr(nr, conteudo_atual)
 
-            log_entrada.append({
-                "nr": nr,
-                "evento": "primeiro_registro",
-                "url": url,
-                "data": datetime.now().isoformat(),
-            })
+           log_entrada.append({
+    "nr": nr,
+    "evento": "primeiro_registro",
+    "url": url,
+    "data": datetime.now().isoformat(),
+    "data_oficial": data_oficial,
+})
 
         elif hash_anterior != hash_atual:
             print(f"    🔴 Alteração detectada em {nr}!")
