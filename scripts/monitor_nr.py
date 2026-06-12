@@ -22,6 +22,7 @@ from datetime import datetime
 from urllib.parse import urljoin, urlparse
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.utils import parsedate_to_datetime
 
 from bs4 import BeautifulSoup
 from pypdf import PdfReader
@@ -117,6 +118,21 @@ def salvar_log(entradas: list):
     log_atual = carregar_json(ARQUIVO_LOG, [])
     log_atual = entradas + log_atual
     salvar_json(ARQUIVO_LOG, log_atual[:300])
+
+
+def formatar_data_oficial(data_http: str | None) -> str | None:
+    """
+    Converte a data Last-Modified do servidor para ISO.
+    Se o Gov.br não informar essa data, retorna None.
+    """
+    if not data_http:
+        return None
+
+    try:
+        data = parsedate_to_datetime(data_http)
+        return data.isoformat()
+    except Exception:
+        return data_http
 
 
 def extrair_numero_nr(texto: str) -> str | None:
@@ -223,7 +239,7 @@ def extrair_texto_html(html_bruto: str) -> str:
 def buscar_conteudo_nr(url: str) -> tuple[str, str | None]:
     """
     Baixa e extrai texto de uma NR.
-    Também tenta capturar a data oficial de última modificação informada pelo Gov.br.
+    Também tenta capturar a data de última modificação informada pelo Gov.br.
     """
     try:
         resp = requests.get(url, headers=HEADERS, timeout=45, allow_redirects=True)
@@ -232,7 +248,7 @@ def buscar_conteudo_nr(url: str) -> tuple[str, str | None]:
         print(f"    ⚠️ Erro ao acessar {url}: {e}")
         return "", None
 
-    data_oficial = resp.headers.get("Last-Modified")
+    data_oficial = formatar_data_oficial(resp.headers.get("Last-Modified"))
 
     content_type = resp.headers.get("Content-Type", "").lower()
     url_final = resp.url.lower()
@@ -249,21 +265,6 @@ def buscar_conteudo_nr(url: str) -> tuple[str, str | None]:
     except Exception as e:
         print(f"    ⚠️ Erro ao ler HTML: {e}")
         return "", data_oficial
-    content_type = resp.headers.get("Content-Type", "").lower()
-    url_final = resp.url.lower()
-
-    if "application/pdf" in content_type or url_final.endswith(".pdf"):
-        try:
-            return extrair_texto_pdf(resp.content)
-        except Exception as e:
-            print(f"    ⚠️ Erro ao ler PDF: {e}")
-            return ""
-
-    try:
-        return extrair_texto_html(resp.text)
-    except Exception as e:
-        print(f"    ⚠️ Erro ao ler HTML: {e}")
-        return ""
 
 
 def gerar_diff(texto_antigo: str, texto_novo: str, limite: int = 12000) -> str:
@@ -407,6 +408,16 @@ def montar_email_html(alteracoes: list) -> str:
             for a in analise.get("acoes_recomendadas", [])
         )
 
+        data_oficial = alt.get("data_oficial")
+        data_oficial_html = ""
+
+        if data_oficial:
+            data_oficial_html = f"""
+              <p style="font-size:13px;color:#6b7280;margin:8px 0;">
+                Data informada pelo Gov.br: {html.escape(str(data_oficial))}
+              </p>
+            """
+
         blocos += f"""
         <div style="background:#ffffff;border:1px solid #e5e7eb;border-left:4px solid {cor};
                     border-radius:8px;padding:20px;margin-bottom:16px;">
@@ -416,6 +427,8 @@ def montar_email_html(alteracoes: list) -> str:
                     display:inline-block;padding:4px 10px;border-radius:20px;">
             Urgência {html.escape(urgencia).upper()}
           </p>
+
+          {data_oficial_html}
 
           <p style="font-size:14px;color:#374151;line-height:1.6;">
             {resumo}
@@ -523,6 +536,7 @@ def main():
                 "evento": "erro_sem_conteudo",
                 "url": url,
                 "data": datetime.now().isoformat(),
+                "data_oficial": data_oficial,
             })
             continue
 
@@ -535,13 +549,13 @@ def main():
             hashes_atualizados[nr] = hash_atual
             salvar_conteudo_nr(nr, conteudo_atual)
 
-           log_entrada.append({
-    "nr": nr,
-    "evento": "primeiro_registro",
-    "url": url,
-    "data": datetime.now().isoformat(),
-    "data_oficial": data_oficial,
-})
+            log_entrada.append({
+                "nr": nr,
+                "evento": "primeiro_registro",
+                "url": url,
+                "data": datetime.now().isoformat(),
+                "data_oficial": data_oficial,
+            })
 
         elif hash_anterior != hash_atual:
             print(f"    🔴 Alteração detectada em {nr}!")
@@ -554,6 +568,7 @@ def main():
             alteracoes.append({
                 "nr": nr,
                 "url": url,
+                "data_oficial": data_oficial,
                 "analise": analise,
             })
 
@@ -565,6 +580,7 @@ def main():
                 "evento": "alteracao_detectada",
                 "url": url,
                 "data": datetime.now().isoformat(),
+                "data_oficial": data_oficial,
                 "urgencia": analise.get("urgencia"),
                 "resumo": analise.get("resumo"),
             })
