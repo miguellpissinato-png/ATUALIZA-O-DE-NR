@@ -135,6 +135,121 @@ def formatar_data_oficial(data_http: str | None) -> str | None:
         return data_http
 
 
+def converter_data_pt_para_iso(data_texto: str) -> str | None:
+    """
+    Converte datas brasileiras para ISO.
+    Aceita:
+    - 12/06/2026
+    - 12-06-2026
+    - 12 de junho de 2026
+    """
+    if not data_texto:
+        return None
+
+    data_texto = data_texto.strip().lower()
+
+    meses = {
+        "janeiro": 1,
+        "fevereiro": 2,
+        "março": 3,
+        "marco": 3,
+        "abril": 4,
+        "maio": 5,
+        "junho": 6,
+        "julho": 7,
+        "agosto": 8,
+        "setembro": 9,
+        "outubro": 10,
+        "novembro": 11,
+        "dezembro": 12,
+    }
+
+    # Formato 12/06/2026 ou 12-06-2026
+    match = re.search(r"(\d{1,2})[/-](\d{1,2})[/-](\d{4})", data_texto)
+
+    if match:
+        dia = int(match.group(1))
+        mes = int(match.group(2))
+        ano = int(match.group(3))
+
+        try:
+            return datetime(ano, mes, dia).isoformat()
+        except ValueError:
+            return None
+
+    # Formato 12 de junho de 2026
+    match = re.search(
+        r"(\d{1,2})\s+de\s+([a-zçãé]+)\s+de\s+(\d{4})",
+        data_texto,
+        flags=re.IGNORECASE,
+    )
+
+    if match:
+        dia = int(match.group(1))
+        mes_nome = match.group(2).lower()
+        ano = int(match.group(3))
+
+        mes = meses.get(mes_nome)
+
+        if not mes:
+            return None
+
+        try:
+            return datetime(ano, mes, dia).isoformat()
+        except ValueError:
+            return None
+
+    return None
+
+
+def extrair_data_do_texto_nr(texto: str) -> str | None:
+    """
+    Tenta encontrar no texto da página/PDF uma data provável de publicação,
+    atualização, modificação ou alteração da NR.
+
+    Se encontrar várias datas, retorna a mais recente.
+    """
+    if not texto:
+        return None
+
+    candidatos = []
+
+    padroes = [
+        # Atualizado em 12/06/2026
+        r"(?:atualizado em|atualizada em|publicado em|publicada em|última atualização|ultima atualização|última modificação|ultima modificação|modificado em|modificada em)\s*:?\s*(\d{1,2}[/-]\d{1,2}[/-]\d{4})",
+
+        # Atualizado em 12 de junho de 2026
+        r"(?:atualizado em|atualizada em|publicado em|publicada em|última atualização|ultima atualização|última modificação|ultima modificação|modificado em|modificada em)\s*:?\s*(\d{1,2}\s+de\s+[a-zçãé]+\s+de\s+\d{4})",
+
+        # Portaria MTE nº 123, de 12 de junho de 2026
+        r"(?:portaria|decreto|lei|instrução normativa|instrucao normativa|resolução|resolucao)[^\n]{0,180}?,\s*de\s*(\d{1,2}\s+de\s+[a-zçãé]+\s+de\s+\d{4})",
+
+        # Portaria MTE nº 123, de 12/06/2026
+        r"(?:portaria|decreto|lei|instrução normativa|instrucao normativa|resolução|resolucao)[^\n]{0,180}?,\s*de\s*(\d{1,2}[/-]\d{1,2}[/-]\d{4})",
+
+        # Alterada pela Portaria ..., de 12/06/2026
+        r"(?:alterada|alterado|atualizada|atualizado|redação dada|redacao dada)[^\n]{0,220}?(\d{1,2}[/-]\d{1,2}[/-]\d{4})",
+
+        # Alterada pela Portaria ..., de 12 de junho de 2026
+        r"(?:alterada|alterado|atualizada|atualizado|redação dada|redacao dada)[^\n]{0,220}?(\d{1,2}\s+de\s+[a-zçãé]+\s+de\s+\d{4})",
+    ]
+
+    for padrao in padroes:
+        matches = re.findall(padrao, texto, flags=re.IGNORECASE)
+
+        for data_encontrada in matches:
+            data_iso = converter_data_pt_para_iso(data_encontrada)
+
+            if data_iso:
+                candidatos.append(data_iso)
+
+    if not candidatos:
+        return None
+
+    candidatos_ordenados = sorted(candidatos, reverse=True)
+    return candidatos_ordenados[0]
+
+
 def extrair_numero_nr(texto: str) -> str | None:
     if not texto:
         return None
@@ -239,7 +354,11 @@ def extrair_texto_html(html_bruto: str) -> str:
 def buscar_conteudo_nr(url: str) -> tuple[str, str | None]:
     """
     Baixa e extrai texto de uma NR.
-    Também tenta capturar a data de última modificação informada pelo Gov.br.
+
+    Tenta descobrir a data oficial de duas formas:
+    1. Pelo cabeçalho Last-Modified do Gov.br;
+    2. Pelo próprio texto da página/PDF, procurando datas de atualização,
+       publicação, modificação, alteração ou portarias.
     """
     try:
         resp = requests.get(url, headers=HEADERS, timeout=45, allow_redirects=True)
@@ -248,23 +367,33 @@ def buscar_conteudo_nr(url: str) -> tuple[str, str | None]:
         print(f"    ⚠️ Erro ao acessar {url}: {e}")
         return "", None
 
-    data_oficial = formatar_data_oficial(resp.headers.get("Last-Modified"))
+    data_last_modified = formatar_data_oficial(resp.headers.get("Last-Modified"))
 
     content_type = resp.headers.get("Content-Type", "").lower()
     url_final = resp.url.lower()
 
+    conteudo = ""
+
     if "application/pdf" in content_type or url_final.endswith(".pdf"):
         try:
-            return extrair_texto_pdf(resp.content), data_oficial
+            conteudo = extrair_texto_pdf(resp.content)
         except Exception as e:
             print(f"    ⚠️ Erro ao ler PDF: {e}")
-            return "", data_oficial
+            return "", data_last_modified
+    else:
+        try:
+            conteudo = extrair_texto_html(resp.text)
+        except Exception as e:
+            print(f"    ⚠️ Erro ao ler HTML: {e}")
+            return "", data_last_modified
 
-    try:
-        return extrair_texto_html(resp.text), data_oficial
-    except Exception as e:
-        print(f"    ⚠️ Erro ao ler HTML: {e}")
-        return "", data_oficial
+    data_extraida_do_texto = extrair_data_do_texto_nr(conteudo)
+
+    # Prioriza a data encontrada no texto da NR/PDF.
+    # Se não encontrar, usa o Last-Modified.
+    data_oficial = data_extraida_do_texto or data_last_modified
+
+    return conteudo, data_oficial
 
 
 def gerar_diff(texto_antigo: str, texto_novo: str, limite: int = 12000) -> str:
@@ -414,7 +543,7 @@ def montar_email_html(alteracoes: list) -> str:
         if data_oficial:
             data_oficial_html = f"""
               <p style="font-size:13px;color:#6b7280;margin:8px 0;">
-                Data informada pelo Gov.br: {html.escape(str(data_oficial))}
+                Data encontrada no Gov.br/PDF: {html.escape(str(data_oficial))}
               </p>
             """
 
