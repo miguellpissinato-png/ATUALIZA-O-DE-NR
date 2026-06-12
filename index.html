@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Monitor de NRs - MTE</title>
+
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --primary: #2563eb;
+      --success: #16a34a;
+      --warning: #f59e0b;
+      --danger: #dc2626;
+      --border: #e5e7eb;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    header {
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      color: white;
+      padding: 32px 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    header p {
+      margin: 8px 0 0;
+      opacity: 0.9;
+    }
+
+    main {
+      width: 100%;
+      max-width: 1100px;
+      margin: -24px auto 40px;
+      padding: 0 16px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+    }
+
+    .card h2 {
+      margin: 0 0 8px;
+      font-size: 16px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .big-number {
+      font-size: 34px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .status-ok {
+      color: var(--success);
+    }
+
+    .status-warning {
+      color: var(--warning);
+    }
+
+    .status-danger {
+      color: var(--danger);
+    }
+
+    .section-title {
+      font-size: 20px;
+      margin: 24px 0 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--card);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+    }
+
+    th, td {
+      padding: 14px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      background: #f9fafb;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .badge-ok {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .badge-info {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .badge-warning {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .log-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .log-item {
+      border-left: 4px solid var(--primary);
+      padding: 14px;
+      background: white;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    .log-item strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .error {
+      background: #fee2e2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+      padding: 14px;
+      border-radius: 12px;
+      margin-top: 16px;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      padding: 24px;
+      font-size: 13px;
+    }
+
+    @media (max-width: 800px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      header h1 {
+        font-size: 23px;
+      }
+
+      table {
+        font-size: 13px;
+      }
+
+      th, td {
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>🛡️ Monitor de Normas Regulamentadoras</h1>
+    <p>Acompanhamento automático das NRs do MTE/Gov.br</p>
+  </header>
+
+  <main>
+    <section class="grid">
+      <div class="card">
+        <h2>NRs monitoradas</h2>
+        <p class="big-number" id="total-nrs">--</p>
+      </div>
+
+      <div class="card">
+        <h2>Último status</h2>
+        <p class="big-number status-ok" id="status-geral">--</p>
+      </div>
+
+      <div class="card">
+        <h2>Última atualização</h2>
+        <p class="big-number" id="ultima-atualizacao" style="font-size: 20px;">--</p>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="section-title">Eventos recentes</h2>
+      <div id="logs" class="log-list">
+        <div class="card">Carregando logs...</div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="section-title">NRs encontradas</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>NR</th>
+            <th>Status</th>
+            <th>Link oficial</th>
+          </tr>
+        </thead>
+        <tbody id="tabela-nrs">
+          <tr>
+            <td colspan="3">Carregando NRs...</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <div id="erro" class="error" style="display: none;"></div>
+  </main>
+
+  <footer>
+    Monitor automático de NRs • Fonte: Ministério do Trabalho e Emprego / Gov.br
+  </footer>
+
+  <script>
+    async function carregarJSON(caminho) {
+      const resposta = await fetch(caminho + "?v=" + Date.now());
+
+      if (!resposta.ok) {
+        throw new Error("Não foi possível carregar " + caminho);
+      }
+
+      return resposta.json();
+    }
+
+    function formatarData(dataISO) {
+      if (!dataISO) return "--";
+
+      const data = new Date(dataISO);
+
+      if (isNaN(data.getTime())) {
+        return dataISO;
+      }
+
+      return data.toLocaleString("pt-BR", {
+        dateStyle: "short",
+        timeStyle: "short"
+      });
+    }
+
+    function nomeEvento(evento) {
+      const nomes = {
+        "primeiro_registro": "Primeiro registro",
+        "alteracao_detectada": "Alteração detectada",
+        "erro_sem_conteudo": "Erro ao obter conteúdo"
+      };
+
+      return nomes[evento] || evento || "Evento";
+    }
+
+    function classeBadge(evento) {
+      if (evento === "alteracao_detectada") return "badge-warning";
+      if (evento === "erro_sem_conteudo") return "badge-warning";
+      return "badge-ok";
+    }
+
+    async function iniciarPainel() {
+      const erro = document.getElementById("erro");
+
+      try {
+        const [links, logs] = await Promise.all([
+          carregarJSON("data/links_nrs.json"),
+          carregarJSON("data/log.json")
+        ]);
+
+        const totalNrs = Object.keys(links).length;
+        document.getElementById("total-nrs").textContent = totalNrs;
+
+        const alteracoes = logs.filter(item => item.evento === "alteracao_detectada");
+        const erros = logs.filter(item => item.evento === "erro_sem_conteudo");
+
+        const statusGeral = document.getElementById("status-geral");
+
+        if (alteracoes.length > 0) {
+          statusGeral.textContent = "Atenção";
+          statusGeral.className = "big-number status-warning";
+        } else if (erros.length > 0) {
+          statusGeral.textContent = "Verificar";
+          statusGeral.className = "big-number status-warning";
+        } else {
+          statusGeral.textContent = "OK";
+          statusGeral.className = "big-number status-ok";
+        }
+
+        if (logs.length > 0) {
+          document.getElementById("ultima-atualizacao").textContent = formatarData(logs[0].data);
+        }
+
+        montarTabelaNrs(links, logs);
+        montarLogs(logs);
+
+      } catch (e) {
+        erro.style.display = "block";
+        erro.innerHTML = `
+          <strong>Erro ao carregar o painel.</strong><br>
+          Verifique se existem os arquivos <code>data/links_nrs.json</code> e <code>data/log.json</code>.
+          <br><br>
+          Detalhe: ${e.message}
+        `;
+      }
+    }
+
+    function montarTabelaNrs(links, logs) {
+      const tbody = document.getElementById("tabela-nrs");
+      tbody.innerHTML = "";
+
+      const ultimoEventoPorNr = {};
+
+      for (const log of logs) {
+        if (!ultimoEventoPorNr[log.nr]) {
+          ultimoEventoPorNr[log.nr] = log;
+        }
+      }
+
+      for (const [nr, url] of Object.entries(links)) {
+        const log = ultimoEventoPorNr[nr];
+        const evento = log ? log.evento : "monitorada";
+
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+          <td><strong>${nr}</strong></td>
+          <td>
+            <span class="badge ${classeBadge(evento)}">
+              ${nomeEvento(evento)}
+            </span>
+          </td>
+          <td><a href="${url}" target="_blank" rel="noopener">Abrir no Gov.br</a></td>
+        `;
+
+        tbody.appendChild(tr);
+      }
+    }
+
+    function montarLogs(logs) {
+      const container = document.getElementById("logs");
+      container.innerHTML = "";
+
+      if (!logs || logs.length === 0) {
+        container.innerHTML = `<div class="card">Nenhum evento registrado ainda.</div>`;
+        return;
+      }
+
+      const ultimosLogs = logs.slice(0, 10);
+
+      for (const item of ultimosLogs) {
+        const div = document.createElement("div");
+        div.className = "log-item";
+
+        div.innerHTML = `
+          <strong>${item.nr || "NR"} — ${nomeEvento(item.evento)}</strong>
+          <div class="muted">${formatarData(item.data)}</div>
+          ${item.resumo ? `<p>${item.resumo}</p>` : ""}
+          ${item.url ? `<a href="${item.url}" target="_blank" rel="noopener">Abrir link oficial</a>` : ""}
+        `;
+
+        container.appendChild(div);
+      }
+    }
+
+    iniciarPainel();
+  </script>
+</body>
+</html>
