@@ -5,7 +5,8 @@ Monitor de Normas Regulamentadoras (NR) - MTE/Gov.br
 - Descobre automaticamente os links reais das NRs;
 - Baixa páginas HTML e PDFs;
 - Compara com a última verificação;
-- Envia e-mail se encontrar alteração.
+- Envia e-mail se encontrar alteração;
+- Gera um arquivo status_nrs.json para alimentar o painel do site.
 """
 
 import os
@@ -42,6 +43,7 @@ PASTA_CONTEUDOS = os.path.join(PASTA_DATA, "conteudos")
 ARQUIVO_HASHES = os.path.join(PASTA_DATA, "hashes.json")
 ARQUIVO_LOG = os.path.join(PASTA_DATA, "log.json")
 ARQUIVO_LINKS = os.path.join(PASTA_DATA, "links_nrs.json")
+ARQUIVO_STATUS_NRS = os.path.join(PASTA_DATA, "status_nrs.json")
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 monitor-nr-bot/2.0"
@@ -164,7 +166,6 @@ def converter_data_pt_para_iso(data_texto: str) -> str | None:
         "dezembro": 12,
     }
 
-    # Formato 12/06/2026 ou 12-06-2026
     match = re.search(r"(\d{1,2})[/-](\d{1,2})[/-](\d{4})", data_texto)
 
     if match:
@@ -177,7 +178,6 @@ def converter_data_pt_para_iso(data_texto: str) -> str | None:
         except ValueError:
             return None
 
-    # Formato 12 de junho de 2026
     match = re.search(
         r"(\d{1,2})\s+de\s+([a-zçãé]+)\s+de\s+(\d{4})",
         data_texto,
@@ -215,22 +215,16 @@ def extrair_data_do_texto_nr(texto: str) -> str | None:
     candidatos = []
 
     padroes = [
-        # Atualizado em 12/06/2026
         r"(?:atualizado em|atualizada em|publicado em|publicada em|última atualização|ultima atualização|última modificação|ultima modificação|modificado em|modificada em)\s*:?\s*(\d{1,2}[/-]\d{1,2}[/-]\d{4})",
 
-        # Atualizado em 12 de junho de 2026
         r"(?:atualizado em|atualizada em|publicado em|publicada em|última atualização|ultima atualização|última modificação|ultima modificação|modificado em|modificada em)\s*:?\s*(\d{1,2}\s+de\s+[a-zçãé]+\s+de\s+\d{4})",
 
-        # Portaria MTE nº 123, de 12 de junho de 2026
         r"(?:portaria|decreto|lei|instrução normativa|instrucao normativa|resolução|resolucao)[^\n]{0,180}?,\s*de\s*(\d{1,2}\s+de\s+[a-zçãé]+\s+de\s+\d{4})",
 
-        # Portaria MTE nº 123, de 12/06/2026
         r"(?:portaria|decreto|lei|instrução normativa|instrucao normativa|resolução|resolucao)[^\n]{0,180}?,\s*de\s*(\d{1,2}[/-]\d{1,2}[/-]\d{4})",
 
-        # Alterada pela Portaria ..., de 12/06/2026
         r"(?:alterada|alterado|atualizada|atualizado|redação dada|redacao dada)[^\n]{0,220}?(\d{1,2}[/-]\d{1,2}[/-]\d{4})",
 
-        # Alterada pela Portaria ..., de 12 de junho de 2026
         r"(?:alterada|alterado|atualizada|atualizado|redação dada|redacao dada)[^\n]{0,220}?(\d{1,2}\s+de\s+[a-zçãé]+\s+de\s+\d{4})",
     ]
 
@@ -388,9 +382,6 @@ def buscar_conteudo_nr(url: str) -> tuple[str, str | None]:
             return "", data_last_modified
 
     data_extraida_do_texto = extrair_data_do_texto_nr(conteudo)
-
-    # Prioriza a data encontrada no texto da NR/PDF.
-    # Se não encontrar, usa o Last-Modified.
     data_oficial = data_extraida_do_texto or data_last_modified
 
     return conteudo, data_oficial
@@ -651,22 +642,34 @@ def main():
 
     alteracoes = []
     log_entrada = []
+    status_nrs = []
 
     for nr, url in nrs_monitoradas.items():
         print(f"  Verificando {nr}...")
         print(f"    URL: {url}")
 
+        momento_verificacao = datetime.now().isoformat()
         conteudo_atual, data_oficial = buscar_conteudo_nr(url)
 
         if not conteudo_atual:
             print(f"    ⚠️ Sem conteúdo para {nr}. Pulando.")
+
             log_entrada.append({
                 "nr": nr,
                 "evento": "erro_sem_conteudo",
                 "url": url,
-                "data": datetime.now().isoformat(),
+                "data": momento_verificacao,
                 "data_oficial": data_oficial,
             })
+
+            status_nrs.append({
+                "nr": nr,
+                "url": url,
+                "status": "erro_sem_conteudo",
+                "data_oficial": data_oficial,
+                "ultima_verificacao": momento_verificacao,
+            })
+
             continue
 
         hash_atual = calcular_hash(conteudo_atual)
@@ -682,8 +685,16 @@ def main():
                 "nr": nr,
                 "evento": "primeiro_registro",
                 "url": url,
-                "data": datetime.now().isoformat(),
+                "data": momento_verificacao,
                 "data_oficial": data_oficial,
+            })
+
+            status_nrs.append({
+                "nr": nr,
+                "url": url,
+                "status": "primeiro_registro",
+                "data_oficial": data_oficial,
+                "ultima_verificacao": momento_verificacao,
             })
 
         elif hash_anterior != hash_atual:
@@ -708,8 +719,18 @@ def main():
                 "nr": nr,
                 "evento": "alteracao_detectada",
                 "url": url,
-                "data": datetime.now().isoformat(),
+                "data": momento_verificacao,
                 "data_oficial": data_oficial,
+                "urgencia": analise.get("urgencia"),
+                "resumo": analise.get("resumo"),
+            })
+
+            status_nrs.append({
+                "nr": nr,
+                "url": url,
+                "status": "alteracao_detectada",
+                "data_oficial": data_oficial,
+                "ultima_verificacao": momento_verificacao,
                 "urgencia": analise.get("urgencia"),
                 "resumo": analise.get("resumo"),
             })
@@ -720,7 +741,16 @@ def main():
             if not os.path.exists(caminho_conteudo_nr(nr)):
                 salvar_conteudo_nr(nr, conteudo_atual)
 
+            status_nrs.append({
+                "nr": nr,
+                "url": url,
+                "status": "sem_alteracoes",
+                "data_oficial": data_oficial,
+                "ultima_verificacao": momento_verificacao,
+            })
+
     salvar_json(ARQUIVO_HASHES, hashes_atualizados)
+    salvar_json(ARQUIVO_STATUS_NRS, status_nrs)
 
     if log_entrada:
         salvar_log(log_entrada)
