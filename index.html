@@ -409,7 +409,12 @@
 
         div.innerHTML = `
           <strong>${item.nr || "NR"} — ${nomeEvento(item.evento)}</strong>
-          <div class="muted">${formatarData(item.data)}</div>
+         <div class="muted">
+  Data informada pelo Gov.br: ${item.data_oficial ? formatarData(item.data_oficial) : "não informada"}
+</div>
+<div class="muted">
+  Detectado pelo monitor: ${formatarData(item.data)}
+</div>
           ${item.resumo ? `<p>${item.resumo}</p>` : ""}
           ${item.url ? `<a href="${item.url}" target="_blank" rel="noopener">Abrir link oficial</a>` : ""}
         `;
