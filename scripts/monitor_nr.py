@@ -7,6 +7,17 @@ Monitor de Normas Regulamentadoras (NR) - MTE/Gov.br
 - Compara com a última verificação;
 - Envia e-mail se encontrar alteração;
 - Gera um arquivo status_nrs.json para alimentar o painel do site.
+
+Observação importante:
+O site gov.br ocasionalmente BLOQUEIA conexões vindas de servidores/
+datacenters (como os runners do GitHub Actions), retornando erro de
+rede ("Network is unreachable") mesmo que a URL esteja correta e
+acessível normalmente de uma conexão residencial.
+
+Para contornar isso, todas as requisições passam primeiro por um
+proxy (ScraperAPI, via variável de ambiente SCRAPERAPI_KEY). Se essa
+chave não estiver configurada, o script tenta acesso direto (que pode
+falhar intermitentemente).
 """
 
 import os
@@ -46,10 +57,56 @@ ARQUIVO_LINKS = os.path.join(PASTA_DATA, "links_nrs.json")
 ARQUIVO_STATUS_NRS = os.path.join(PASTA_DATA, "status_nrs.json")
 
 HEADERS = {
-    "User-Agent": "Mozilla/5.0 monitor-nr-bot/2.0"
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) monitor-nr-bot/2.1"
 }
 
 ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-20250514")
+
+# Número de tentativas para cada requisição antes de desistir
+MAX_TENTATIVAS = 3
+
+
+# ── Requisições HTTP (com proxy de fallback) ───────────────────────────────────
+
+def _fazer_requisicao(url: str):
+    """
+    Faz uma requisição GET com retentativas.
+
+    Tenta, na ordem:
+    1. Via ScraperAPI (se SCRAPERAPI_KEY estiver configurada) — contorna
+       bloqueios de IP de datacenter.
+    2. Acesso direto, como fallback.
+
+    Levanta a última exceção se todas as tentativas falharem.
+    """
+    scraperapi_key = os.environ.get("SCRAPERAPI_KEY", "").strip()
+    ultima_excecao = None
+
+    for tentativa in range(1, MAX_TENTATIVAS + 1):
+        try:
+            if scraperapi_key:
+                resp = requests.get(
+                    "https://api.scraperapi.com/",
+                    params={
+                        "api_key": scraperapi_key,
+                        "url": url,
+                        "country_code": "br",
+                    },
+                    timeout=60,
+                )
+            else:
+                resp = requests.get(
+                    url, headers=HEADERS, timeout=30, allow_redirects=True
+                )
+
+            resp.raise_for_status()
+            return resp
+
+        except requests.RequestException as e:
+            ultima_excecao = e
+            print(f"    ⚠️ Tentativa {tentativa}/{MAX_TENTATIVAS} falhou para {url}: {e}")
+
+    raise ultima_excecao
 
 
 def garantir_pastas():
@@ -122,7 +179,7 @@ def salvar_log(entradas: list):
     salvar_json(ARQUIVO_LOG, log_atual[:300])
 
 
-def formatar_data_oficial(data_http: str | None) -> str | None:
+def formatar_data_oficial(data_http):
     """
     Converte a data Last-Modified do servidor para ISO.
     Se o Gov.br não informar essa data, retorna None.
@@ -137,7 +194,7 @@ def formatar_data_oficial(data_http: str | None) -> str | None:
         return data_http
 
 
-def converter_data_pt_para_iso(data_texto: str) -> str | None:
+def converter_data_pt_para_iso(data_texto: str):
     """
     Converte datas brasileiras para ISO.
     Aceita:
@@ -151,19 +208,10 @@ def converter_data_pt_para_iso(data_texto: str) -> str | None:
     data_texto = data_texto.strip().lower()
 
     meses = {
-        "janeiro": 1,
-        "fevereiro": 2,
-        "março": 3,
-        "marco": 3,
-        "abril": 4,
-        "maio": 5,
-        "junho": 6,
-        "julho": 7,
-        "agosto": 8,
-        "setembro": 9,
-        "outubro": 10,
-        "novembro": 11,
-        "dezembro": 12,
+        "janeiro": 1, "fevereiro": 2, "março": 3, "marco": 3,
+        "abril": 4, "maio": 5, "junho": 6, "julho": 7,
+        "agosto": 8, "setembro": 9, "outubro": 10,
+        "novembro": 11, "dezembro": 12,
     }
 
     match = re.search(r"(\d{1,2})[/-](\d{1,2})[/-](\d{4})", data_texto)
@@ -202,7 +250,7 @@ def converter_data_pt_para_iso(data_texto: str) -> str | None:
     return None
 
 
-def extrair_data_do_texto_nr(texto: str) -> str | None:
+def extrair_data_do_texto_nr(texto: str):
     """
     Tenta encontrar no texto da página/PDF uma data provável de publicação,
     atualização, modificação ou alteração da NR.
@@ -216,15 +264,10 @@ def extrair_data_do_texto_nr(texto: str) -> str | None:
 
     padroes = [
         r"(?:atualizado em|atualizada em|publicado em|publicada em|última atualização|ultima atualização|última modificação|ultima modificação|modificado em|modificada em)\s*:?\s*(\d{1,2}[/-]\d{1,2}[/-]\d{4})",
-
         r"(?:atualizado em|atualizada em|publicado em|publicada em|última atualização|ultima atualização|última modificação|ultima modificação|modificado em|modificada em)\s*:?\s*(\d{1,2}\s+de\s+[a-zçãé]+\s+de\s+\d{4})",
-
         r"(?:portaria|decreto|lei|instrução normativa|instrucao normativa|resolução|resolucao)[^\n]{0,180}?,\s*de\s*(\d{1,2}\s+de\s+[a-zçãé]+\s+de\s+\d{4})",
-
         r"(?:portaria|decreto|lei|instrução normativa|instrucao normativa|resolução|resolucao)[^\n]{0,180}?,\s*de\s*(\d{1,2}[/-]\d{1,2}[/-]\d{4})",
-
         r"(?:alterada|alterado|atualizada|atualizado|redação dada|redacao dada)[^\n]{0,220}?(\d{1,2}[/-]\d{1,2}[/-]\d{4})",
-
         r"(?:alterada|alterado|atualizada|atualizado|redação dada|redacao dada)[^\n]{0,220}?(\d{1,2}\s+de\s+[a-zçãé]+\s+de\s+\d{4})",
     ]
 
@@ -244,7 +287,7 @@ def extrair_data_do_texto_nr(texto: str) -> str | None:
     return candidatos_ordenados[0]
 
 
-def extrair_numero_nr(texto: str) -> str | None:
+def extrair_numero_nr(texto: str):
     if not texto:
         return None
 
@@ -267,8 +310,7 @@ def extrair_numero_nr(texto: str) -> str | None:
 def descobrir_links_nrs() -> dict:
     print("  Buscando lista oficial de NRs no site do MTE/Gov.br...")
 
-    resp = requests.get(URL_INDICE_NRS, headers=HEADERS, timeout=30)
-    resp.raise_for_status()
+    resp = _fazer_requisicao(URL_INDICE_NRS)
 
     soup = BeautifulSoup(resp.text, "html.parser")
     links = {}
@@ -345,7 +387,7 @@ def extrair_texto_html(html_bruto: str) -> str:
     return normalizar_texto(texto)
 
 
-def buscar_conteudo_nr(url: str) -> tuple[str, str | None]:
+def buscar_conteudo_nr(url: str):
     """
     Baixa e extrai texto de uma NR.
 
@@ -355,8 +397,7 @@ def buscar_conteudo_nr(url: str) -> tuple[str, str | None]:
        publicação, modificação, alteração ou portarias.
     """
     try:
-        resp = requests.get(url, headers=HEADERS, timeout=45, allow_redirects=True)
-        resp.raise_for_status()
+        resp = _fazer_requisicao(url)
     except requests.RequestException as e:
         print(f"    ⚠️ Erro ao acessar {url}: {e}")
         return "", None
@@ -392,12 +433,9 @@ def gerar_diff(texto_antigo: str, texto_novo: str, limite: int = 12000) -> str:
     novo = normalizar_texto(texto_novo).splitlines()
 
     diff = difflib.unified_diff(
-        antigo,
-        novo,
-        fromfile="versao_anterior",
-        tofile="versao_atual",
-        lineterm="",
-        n=3,
+        antigo, novo,
+        fromfile="versao_anterior", tofile="versao_atual",
+        lineterm="", n=3,
     )
 
     texto_diff = "\n".join(diff)
@@ -501,11 +539,7 @@ Não escreva nada fora do JSON.
 def montar_email_html(alteracoes: list) -> str:
     data_hoje = datetime.now().strftime("%d/%m/%Y")
 
-    cores = {
-        "alta": "#E24B4A",
-        "média": "#EF9F27",
-        "baixa": "#1D9E75",
-    }
+    cores = {"alta": "#E24B4A", "média": "#EF9F27", "baixa": "#1D9E75"}
 
     blocos = ""
 
@@ -618,6 +652,41 @@ def enviar_email(alteracoes: list):
         print(f"  ⚠️ Erro ao enviar e-mail: {e}")
 
 
+def enviar_email_erro_critico(mensagem: str):
+    """
+    Envia um aviso por e-mail quando o sistema não consegue nem descobrir
+    os links das NRs (ex: bloqueio persistente do gov.br), para que o
+    problema não passe despercebido por dias.
+    """
+    remetente = os.getenv("EMAIL_REMETENTE")
+    senha = os.getenv("EMAIL_SENHA_APP")
+    destinatario = os.getenv("EMAIL_DESTINATARIO")
+
+    if not remetente or not senha or not destinatario:
+        return
+
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = f"⚠️ Monitor de NRs — falha na verificação de {datetime.now().strftime('%d/%m/%Y')}"
+    msg["From"] = remetente
+    msg["To"] = destinatario
+
+    corpo = f"""<p>O monitor de NRs não conseguiu completar a verificação de hoje.</p>
+    <p><strong>Motivo:</strong> {html.escape(mensagem)}</p>
+    <p>Isso geralmente ocorre por bloqueio temporário do site gov.br a conexões
+    de servidores. Nenhuma ação é necessária se isso for pontual; caso se repita
+    por vários dias, verifique a configuração do SCRAPERAPI_KEY.</p>"""
+
+    msg.attach(MIMEText(corpo, "html", "utf-8"))
+
+    try:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
+            smtp.login(remetente, senha)
+            smtp.sendmail(remetente, destinatario, msg.as_string())
+        print(f"  ✉️ E-mail de aviso de erro enviado para {destinatario}")
+    except Exception as e:
+        print(f"  ⚠️ Erro ao enviar e-mail de aviso: {e}")
+
+
 def main():
     garantir_pastas()
 
@@ -629,10 +698,12 @@ def main():
         nrs_monitoradas = descobrir_links_nrs()
     except Exception as e:
         print(f"  ❌ Erro ao descobrir links das NRs: {e}")
+        enviar_email_erro_critico(str(e))
         return
 
     if not nrs_monitoradas:
         print("  ❌ Nenhuma NR foi encontrada.")
+        enviar_email_erro_critico("A página índice de NRs não retornou nenhum link reconhecido.")
         return
 
     print(f"  {len(nrs_monitoradas)} NRs encontradas para monitoramento.\n")
@@ -655,17 +726,12 @@ def main():
             print(f"    ⚠️ Sem conteúdo para {nr}. Pulando.")
 
             log_entrada.append({
-                "nr": nr,
-                "evento": "erro_sem_conteudo",
-                "url": url,
-                "data": momento_verificacao,
-                "data_oficial": data_oficial,
+                "nr": nr, "evento": "erro_sem_conteudo", "url": url,
+                "data": momento_verificacao, "data_oficial": data_oficial,
             })
 
             status_nrs.append({
-                "nr": nr,
-                "url": url,
-                "status": "erro_sem_conteudo",
+                "nr": nr, "url": url, "status": "erro_sem_conteudo",
                 "data_oficial": data_oficial,
                 "ultima_verificacao": momento_verificacao,
             })
@@ -682,17 +748,12 @@ def main():
             salvar_conteudo_nr(nr, conteudo_atual)
 
             log_entrada.append({
-                "nr": nr,
-                "evento": "primeiro_registro",
-                "url": url,
-                "data": momento_verificacao,
-                "data_oficial": data_oficial,
+                "nr": nr, "evento": "primeiro_registro", "url": url,
+                "data": momento_verificacao, "data_oficial": data_oficial,
             })
 
             status_nrs.append({
-                "nr": nr,
-                "url": url,
-                "status": "primeiro_registro",
+                "nr": nr, "url": url, "status": "primeiro_registro",
                 "data_oficial": data_oficial,
                 "ultima_verificacao": momento_verificacao,
             })
@@ -706,9 +767,7 @@ def main():
             analise = analisar_alteracao_com_ia(nr, url, diff, conteudo_atual)
 
             alteracoes.append({
-                "nr": nr,
-                "url": url,
-                "data_oficial": data_oficial,
+                "nr": nr, "url": url, "data_oficial": data_oficial,
                 "analise": analise,
             })
 
@@ -716,19 +775,14 @@ def main():
             salvar_conteudo_nr(nr, conteudo_atual)
 
             log_entrada.append({
-                "nr": nr,
-                "evento": "alteracao_detectada",
-                "url": url,
-                "data": momento_verificacao,
-                "data_oficial": data_oficial,
+                "nr": nr, "evento": "alteracao_detectada", "url": url,
+                "data": momento_verificacao, "data_oficial": data_oficial,
                 "urgencia": analise.get("urgencia"),
                 "resumo": analise.get("resumo"),
             })
 
             status_nrs.append({
-                "nr": nr,
-                "url": url,
-                "status": "alteracao_detectada",
+                "nr": nr, "url": url, "status": "alteracao_detectada",
                 "data_oficial": data_oficial,
                 "ultima_verificacao": momento_verificacao,
                 "urgencia": analise.get("urgencia"),
@@ -742,9 +796,7 @@ def main():
                 salvar_conteudo_nr(nr, conteudo_atual)
 
             status_nrs.append({
-                "nr": nr,
-                "url": url,
-                "status": "sem_alteracoes",
+                "nr": nr, "url": url, "status": "sem_alteracoes",
                 "data_oficial": data_oficial,
                 "ultima_verificacao": momento_verificacao,
             })
