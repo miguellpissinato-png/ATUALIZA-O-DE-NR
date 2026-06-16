@@ -2,8 +2,10 @@ name: Monitor Diário de NRs
 
 on:
   schedule:
-    # Roda todo dia às 08:00 horário de Brasília (11:00 UTC)
-    - cron: "0 11 * * 1-5"
+    # Roda todo dia às 06:00 horário de Brasília (09:00 UTC)
+    # Horário escolhido fora do pico de uso do GitHub Actions, para
+    # reduzir a chance de atraso na execução agendada.
+    - cron: "0 9 * * 1-5"
 
   # Permite rodar manualmente pelo painel do GitHub
   workflow_dispatch:
@@ -13,7 +15,7 @@ jobs:
     name: Verificar alterações nas NRs
     runs-on: ubuntu-latest
 
-    # Permissão para commitar os arquivos de hash atualizados
+    # Permissão para commitar os arquivos de dados atualizados
     permissions:
       contents: write
 
@@ -35,15 +37,16 @@ jobs:
       - name: Executar monitor de NRs
         env:
           ANTHROPIC_API_KEY:    ${{ secrets.ANTHROPIC_API_KEY }}
+          SCRAPERAPI_KEY:       ${{ secrets.SCRAPERAPI_KEY }}
           EMAIL_REMETENTE:      ${{ secrets.EMAIL_REMETENTE }}
           EMAIL_SENHA_APP:      ${{ secrets.EMAIL_SENHA_APP }}
           EMAIL_DESTINATARIO:   ${{ secrets.EMAIL_DESTINATARIO }}
         run: python scripts/monitor_nr.py
 
-      - name: Salvar hashes atualizados no repositório
+      - name: Salvar dados atualizados no repositório
         run: |
           git config user.name  "monitor-nr-bot"
           git config user.email "bot@monitor-nr"
           git add data/
-          git diff --staged --quiet || git commit -m "chore: atualiza hashes NRs $(date +'%Y-%m-%d')"
+          git diff --staged --quiet || git commit -m "chore: atualiza dados NRs $(date +'%Y-%m-%d')"
           git push
