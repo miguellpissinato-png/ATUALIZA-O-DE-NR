@@ -30,7 +30,7 @@ import difflib
 import requests
 
 from io import BytesIO
-from datetime import datetime
+from datetime import datetime, timezone
 from urllib.parse import urljoin, urlparse
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -719,7 +719,7 @@ def main():
         print(f"  Verificando {nr}...")
         print(f"    URL: {url}")
 
-        momento_verificacao = datetime.now().isoformat()
+        momento_verificacao = datetime.now(timezone.utc).isoformat()
         conteudo_atual, data_oficial = buscar_conteudo_nr(url)
 
         if not conteudo_atual:
