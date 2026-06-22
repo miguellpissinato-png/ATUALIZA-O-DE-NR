@@ -2,28 +2,32 @@ name: Monitor Diário de NRs
 
 on:
   schedule:
-    # Roda todo dia às 06:00 horário de Brasília (09:00 UTC)
-    # Horário escolhido fora do pico de uso do GitHub Actions, para
-    # reduzir a chance de atraso na execução agendada.
-    - cron: "0 9 * * 1-5"
+    # Roda de segunda a sexta às 06:17 no horário de São Paulo/Brasília
+    # Usei 06:17 para evitar o minuto 00, que costuma ter mais atraso no GitHub Actions.
+    - cron: "17 6 * * 1-5"
+      timezone: "America/Sao_Paulo"
 
   # Permite rodar manualmente pelo painel do GitHub
   workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: monitor-diario-nrs
+  cancel-in-progress: false
 
 jobs:
   monitorar-nrs:
     name: Verificar alterações nas NRs
     runs-on: ubuntu-latest
 
-    # Permissão para commitar os arquivos de dados atualizados
-    permissions:
-      contents: write
-
     steps:
       - name: Checkout do repositório
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
       - name: Configurar Python 3.11
         uses: actions/setup-python@v5
@@ -36,17 +40,24 @@ jobs:
 
       - name: Executar monitor de NRs
         env:
-          ANTHROPIC_API_KEY:    ${{ secrets.ANTHROPIC_API_KEY }}
-          SCRAPERAPI_KEY:       ${{ secrets.SCRAPERAPI_KEY }}
-          EMAIL_REMETENTE:      ${{ secrets.EMAIL_REMETENTE }}
-          EMAIL_SENHA_APP:      ${{ secrets.EMAIL_SENHA_APP }}
-          EMAIL_DESTINATARIO:   ${{ secrets.EMAIL_DESTINATARIO }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SCRAPERAPI_KEY: ${{ secrets.SCRAPERAPI_KEY }}
+          EMAIL_REMETENTE: ${{ secrets.EMAIL_REMETENTE }}
+          EMAIL_SENHA_APP: ${{ secrets.EMAIL_SENHA_APP }}
+          EMAIL_DESTINATARIO: ${{ secrets.EMAIL_DESTINATARIO }}
         run: python scripts/monitor_nr.py
 
       - name: Salvar dados atualizados no repositório
         run: |
-          git config user.name  "monitor-nr-bot"
+          git config user.name "monitor-nr-bot"
           git config user.email "bot@monitor-nr"
+
           git add data/
-          git diff --staged --quiet || git commit -m "chore: atualiza dados NRs $(date +'%Y-%m-%d')"
-          git push
+
+          if git diff --staged --quiet; then
+            echo "Nenhuma alteração encontrada em data/. Nada para commitar."
+          else
+            git commit -m "chore: atualiza dados NRs $(date +'%Y-%m-%d')"
+            git pull --rebase origin ${{ github.ref_name }}
+            git push origin HEAD:${{ github.ref_name }}
+          fi
