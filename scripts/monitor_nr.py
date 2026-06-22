@@ -31,6 +31,7 @@ import requests
 
 from io import BytesIO
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from urllib.parse import urljoin, urlparse
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -55,6 +56,9 @@ ARQUIVO_HASHES = os.path.join(PASTA_DATA, "hashes.json")
 ARQUIVO_LOG = os.path.join(PASTA_DATA, "log.json")
 ARQUIVO_LINKS = os.path.join(PASTA_DATA, "links_nrs.json")
 ARQUIVO_STATUS_NRS = os.path.join(PASTA_DATA, "status_nrs.json")
+ARQUIVO_STATUS_MONITOR = os.path.join(PASTA_DATA, "status_monitor.json")
+
+FUSO_BRASIL = ZoneInfo("America/Sao_Paulo")
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) monitor-nr-bot/2.1"
@@ -173,10 +177,65 @@ def salvar_conteudo_nr(nr: str, conteudo: str):
         f.write(conteudo)
 
 
+def agora_brasilia():
+    return datetime.now(FUSO_BRASIL)
+
+
+def formatar_data_hora_br(data: datetime) -> str:
+    return data.strftime("%d/%m/%Y, %H:%M")
+
+
+def evento_e_alteracao_real(evento) -> bool:
+    """
+    O log.json deve alimentar a área "Eventos recentes" do site.
+
+    Por isso, ele deve guardar SOMENTE alterações reais em NRs.
+    Verificação concluída, primeiro registro e erro de leitura ficam no status,
+    não entram em eventos recentes.
+    """
+    return (
+        isinstance(evento, dict)
+        and evento.get("evento") == "alteracao_detectada"
+        and bool(evento.get("nr"))
+    )
+
+
 def salvar_log(entradas: list):
+    """
+    Mantém o log.json limpo.
+
+    Antes o script gravava primeiro_registro/erro_sem_conteudo no log,
+    e o site acabava mostrando "NR — Evento" mesmo sem alteração real.
+    Agora o log recebe apenas alterações detectadas.
+    """
     log_atual = carregar_json(ARQUIVO_LOG, [])
-    log_atual = entradas + log_atual
-    salvar_json(ARQUIVO_LOG, log_atual[:300])
+
+    if not isinstance(log_atual, list):
+        log_atual = []
+
+    entradas_validas = [e for e in entradas if evento_e_alteracao_real(e)]
+    log_atual_limpo = [e for e in log_atual if evento_e_alteracao_real(e)]
+
+    log_atualizado = entradas_validas + log_atual_limpo
+    salvar_json(ARQUIVO_LOG, log_atualizado[:300])
+
+
+def salvar_status_monitor(status: str, mensagem: str, **extras):
+    """
+    Arquivo global para o site saber quando o robô rodou pela última vez
+    e quantas alterações foram encontradas nesta verificação.
+    """
+    agora = agora_brasilia()
+
+    dados = {
+        "ultima_verificacao": agora.isoformat(),
+        "ultima_verificacao_formatada": formatar_data_hora_br(agora),
+        "status": status,
+        "mensagem": mensagem,
+    }
+
+    dados.update(extras)
+    salvar_json(ARQUIVO_STATUS_MONITOR, dados)
 
 
 def formatar_data_oficial(data_http):
@@ -687,53 +746,87 @@ def enviar_email_erro_critico(mensagem: str):
         print(f"  ⚠️ Erro ao enviar e-mail de aviso: {e}")
 
 
+
 def main():
     garantir_pastas()
 
+    inicio_verificacao = agora_brasilia()
+    inicio_iso = inicio_verificacao.isoformat()
+    inicio_formatado = formatar_data_hora_br(inicio_verificacao)
+
     print(f"\n{'=' * 65}")
-    print(f"  Monitor de NRs — {datetime.now().strftime('%d/%m/%Y %H:%M')}")
+    print(f"  Monitor de NRs — {inicio_formatado}")
     print(f"{'=' * 65}\n")
 
     try:
         nrs_monitoradas = descobrir_links_nrs()
     except Exception as e:
-        print(f"  ❌ Erro ao descobrir links das NRs: {e}")
+        mensagem = f"Erro ao descobrir links das NRs: {e}"
+        print(f"  ❌ {mensagem}")
+
+        salvar_status_monitor(
+            status="erro",
+            mensagem=mensagem,
+            houve_alteracao=False,
+            alteracoes_desde_ultima_verificacao=0,
+            nrs_monitoradas=0,
+            erros=1,
+        )
+        salvar_log([])
         enviar_email_erro_critico(str(e))
         return
 
     if not nrs_monitoradas:
-        print("  ❌ Nenhuma NR foi encontrada.")
-        enviar_email_erro_critico("A página índice de NRs não retornou nenhum link reconhecido.")
+        mensagem = "A página índice de NRs não retornou nenhum link reconhecido."
+        print(f"  ❌ {mensagem}")
+
+        salvar_status_monitor(
+            status="erro",
+            mensagem=mensagem,
+            houve_alteracao=False,
+            alteracoes_desde_ultima_verificacao=0,
+            nrs_monitoradas=0,
+            erros=1,
+        )
+        salvar_log([])
+        enviar_email_erro_critico(mensagem)
         return
 
     print(f"  {len(nrs_monitoradas)} NRs encontradas para monitoramento.\n")
 
     hashes_salvos = carregar_json(ARQUIVO_HASHES, {})
+
+    if not isinstance(hashes_salvos, dict):
+        hashes_salvos = {}
+
     hashes_atualizados = dict(hashes_salvos)
 
     alteracoes = []
-    log_entrada = []
+    log_alteracoes = []
     status_nrs = []
 
     for nr, url in nrs_monitoradas.items():
         print(f"  Verificando {nr}...")
         print(f"    URL: {url}")
 
-        momento_verificacao = datetime.now(timezone.utc).isoformat()
+        momento_nr = agora_brasilia()
+        momento_verificacao = momento_nr.isoformat()
+        momento_verificacao_formatado = formatar_data_hora_br(momento_nr)
+
         conteudo_atual, data_oficial = buscar_conteudo_nr(url)
 
         if not conteudo_atual:
             print(f"    ⚠️ Sem conteúdo para {nr}. Pulando.")
 
-            log_entrada.append({
-                "nr": nr, "evento": "erro_sem_conteudo", "url": url,
-                "data": momento_verificacao, "data_oficial": data_oficial,
-            })
-
             status_nrs.append({
-                "nr": nr, "url": url, "status": "erro_sem_conteudo",
+                "nr": nr,
+                "url": url,
+                "status": "erro_sem_conteudo",
+                "evento": "Erro de leitura",
                 "data_oficial": data_oficial,
+                "data_encontrada": data_oficial,
                 "ultima_verificacao": momento_verificacao,
+                "ultima_verificacao_formatada": momento_verificacao_formatado,
             })
 
             continue
@@ -747,15 +840,15 @@ def main():
             hashes_atualizados[nr] = hash_atual
             salvar_conteudo_nr(nr, conteudo_atual)
 
-            log_entrada.append({
-                "nr": nr, "evento": "primeiro_registro", "url": url,
-                "data": momento_verificacao, "data_oficial": data_oficial,
-            })
-
             status_nrs.append({
-                "nr": nr, "url": url, "status": "primeiro_registro",
+                "nr": nr,
+                "url": url,
+                "status": "primeiro_registro",
+                "evento": "Primeiro registro",
                 "data_oficial": data_oficial,
+                "data_encontrada": data_oficial,
                 "ultima_verificacao": momento_verificacao,
+                "ultima_verificacao_formatada": momento_verificacao_formatado,
             })
 
         elif hash_anterior != hash_atual:
@@ -766,27 +859,51 @@ def main():
 
             analise = analisar_alteracao_com_ia(nr, url, diff, conteudo_atual)
 
-            alteracoes.append({
-                "nr": nr, "url": url, "data_oficial": data_oficial,
+            alteracao = {
+                "nr": nr,
+                "url": url,
+                "data_oficial": data_oficial,
+                "data_encontrada": data_oficial,
                 "analise": analise,
-            })
+            }
+
+            alteracoes.append(alteracao)
 
             hashes_atualizados[nr] = hash_atual
             salvar_conteudo_nr(nr, conteudo_atual)
 
-            log_entrada.append({
-                "nr": nr, "evento": "alteracao_detectada", "url": url,
-                "data": momento_verificacao, "data_oficial": data_oficial,
-                "urgencia": analise.get("urgencia"),
-                "resumo": analise.get("resumo"),
+            resumo = analise.get("resumo", "Alteração detectada.")
+            urgencia = analise.get("urgencia", "média")
+
+            log_alteracoes.append({
+                "nr": nr,
+                "evento": "alteracao_detectada",
+                "evento_label": "Alteração detectada",
+                "titulo": f"{nr} — Alteração detectada",
+                "descricao": resumo,
+                "url": url,
+                "data": momento_verificacao,
+                "detectado_em": momento_verificacao,
+                "detectado_em_formatado": momento_verificacao_formatado,
+                "data_oficial": data_oficial,
+                "data_encontrada": data_oficial,
+                "urgencia": urgencia,
+                "resumo": resumo,
+                "pontos_principais": analise.get("pontos_principais", []),
+                "acoes_recomendadas": analise.get("acoes_recomendadas", []),
             })
 
             status_nrs.append({
-                "nr": nr, "url": url, "status": "alteracao_detectada",
+                "nr": nr,
+                "url": url,
+                "status": "alteracao_detectada",
+                "evento": "Alteração detectada",
                 "data_oficial": data_oficial,
+                "data_encontrada": data_oficial,
                 "ultima_verificacao": momento_verificacao,
-                "urgencia": analise.get("urgencia"),
-                "resumo": analise.get("resumo"),
+                "ultima_verificacao_formatada": momento_verificacao_formatado,
+                "urgencia": urgencia,
+                "resumo": resumo,
             })
 
         else:
@@ -796,16 +913,64 @@ def main():
                 salvar_conteudo_nr(nr, conteudo_atual)
 
             status_nrs.append({
-                "nr": nr, "url": url, "status": "sem_alteracoes",
+                "nr": nr,
+                "url": url,
+                "status": "sem_alteracoes",
+                "evento": "Sem alterações",
                 "data_oficial": data_oficial,
+                "data_encontrada": data_oficial,
                 "ultima_verificacao": momento_verificacao,
+                "ultima_verificacao_formatada": momento_verificacao_formatado,
             })
+
+    fim_verificacao = agora_brasilia()
+    fim_iso = fim_verificacao.isoformat()
+    fim_formatado = formatar_data_hora_br(fim_verificacao)
+
+    total_erros = sum(1 for item in status_nrs if str(item.get("status", "")).startswith("erro"))
+    total_alteracoes = len(alteracoes)
+    houve_alteracao = total_alteracoes > 0
+
+    if houve_alteracao:
+        mensagem_status = f"{total_alteracoes} NR(s) mudaram desde a última verificação."
+    else:
+        mensagem_status = "Nenhuma NR mudou desde a última verificação."
+
+    status_geral = "concluida_com_erros" if total_erros else "concluida"
+
+    # Mantém status_nrs.json como lista, para não quebrar seu site caso ele já leia esse formato.
+    # Também adiciona campos globais em cada item, facilitando a exibição da última verificação.
+    for item in status_nrs:
+        item["inicio_verificacao"] = inicio_iso
+        item["inicio_verificacao_formatada"] = inicio_formatado
+        item["fim_verificacao"] = fim_iso
+        item["fim_verificacao_formatada"] = fim_formatado
+        item["ultima_verificacao_geral"] = fim_iso
+        item["ultima_verificacao_geral_formatada"] = fim_formatado
+        item["status_sistema"] = status_geral
+        item["houve_alteracao_na_verificacao"] = houve_alteracao
+        item["alteracoes_desde_ultima_verificacao"] = total_alteracoes
+        item["mensagem_verificacao"] = mensagem_status
 
     salvar_json(ARQUIVO_HASHES, hashes_atualizados)
     salvar_json(ARQUIVO_STATUS_NRS, status_nrs)
 
-    if log_entrada:
-        salvar_log(log_entrada)
+    salvar_status_monitor(
+        status=status_geral,
+        mensagem=mensagem_status,
+        houve_alteracao=houve_alteracao,
+        alteracoes_desde_ultima_verificacao=total_alteracoes,
+        nrs_monitoradas=len(nrs_monitoradas),
+        nrs_verificadas=len(status_nrs),
+        erros=total_erros,
+        inicio_verificacao=inicio_iso,
+        inicio_verificacao_formatada=inicio_formatado,
+        fim_verificacao=fim_iso,
+        fim_verificacao_formatada=fim_formatado,
+    )
+
+    # Atualiza/limpa log.json. Ele fica somente com alterações reais.
+    salvar_log(log_alteracoes)
 
     if alteracoes:
         print(f"\n  Enviando e-mail com {len(alteracoes)} alteração(ões)...")
