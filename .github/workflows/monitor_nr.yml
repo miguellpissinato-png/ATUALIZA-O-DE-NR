@@ -2,8 +2,9 @@ name: Monitor Diário de NRs
 
 on:
   schedule:
-    # Roda de segunda a sexta às 06:17 no horário de São Paulo/Brasília
-    # Evita o minuto 00, pois o GitHub pode atrasar ou descartar execuções em horários de pico.
+    # Roda de segunda a sexta às 06:17 no horário de São Paulo/Brasília.
+    # O timezone evita depender de conversão manual para UTC.
+    # O minuto 17 evita o começo da hora, que pode sofrer mais atrasos.
     - cron: "17 6 * * 1-5"
       timezone: "America/Sao_Paulo"
 
@@ -46,64 +47,12 @@ jobs:
           EMAIL_DESTINATARIO: ${{ secrets.EMAIL_DESTINATARIO }}
         run: python scripts/monitor_nr.py
 
-      - name: Registrar última verificação no log
-        run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          from datetime import datetime
-          from zoneinfo import ZoneInfo
-
-          agora = datetime.now(ZoneInfo("America/Sao_Paulo"))
-
-          registro = {
-              "data": agora.strftime("%Y-%m-%d"),
-              "hora": agora.strftime("%H:%M:%S"),
-              "data_hora": agora.isoformat(),
-              "status": "verificacao_concluida",
-              "origem": "github_actions"
-          }
-
-          caminhos = [
-              Path("log.json"),
-              Path("data/log.json")
-          ]
-
-          for caminho in caminhos:
-              caminho.parent.mkdir(parents=True, exist_ok=True)
-
-              try:
-                  if caminho.exists() and caminho.stat().st_size > 0:
-                      conteudo = json.loads(caminho.read_text(encoding="utf-8"))
-                      if isinstance(conteudo, list):
-                          logs = conteudo
-                      else:
-                          logs = [conteudo]
-                  else:
-                      logs = []
-              except Exception:
-                  logs = []
-
-              logs.append(registro)
-
-              # Mantém somente os últimos 100 registros
-              logs = logs[-100:]
-
-              caminho.write_text(
-                  json.dumps(logs, ensure_ascii=False, indent=2),
-                  encoding="utf-8"
-              )
-
-          print("Log atualizado com sucesso.")
-          PY
-
       - name: Salvar dados atualizados no repositório
         run: |
           git config user.name "monitor-nr-bot"
           git config user.email "bot@monitor-nr"
 
           git add data/
-          git add log.json
 
           if git diff --staged --quiet; then
             echo "Nenhuma alteração encontrada. Nada para commitar."
