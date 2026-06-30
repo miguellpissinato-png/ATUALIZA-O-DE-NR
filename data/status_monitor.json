@@ -1,6 +1,6 @@
 {
-  "ultima_verificacao": "2026-06-29T15:01:17.950676-03:00",
-  "ultima_verificacao_formatada": "29/06/2026, 15:01",
+  "ultima_verificacao": "2026-06-30T13:57:43.720315-03:00",
+  "ultima_verificacao_formatada": "30/06/2026, 13:57",
   "status": "concluida",
   "mensagem": "Nenhuma NR mudou desde a última verificação.",
   "houve_alteracao": false,
@@ -8,8 +8,8 @@
   "nrs_monitoradas": 38,
   "nrs_verificadas": 38,
   "erros": 0,
-  "inicio_verificacao": "2026-06-29T15:00:11.703756-03:00",
-  "inicio_verificacao_formatada": "29/06/2026, 15:00",
-  "fim_verificacao": "2026-06-29T15:01:17.949605-03:00",
-  "fim_verificacao_formatada": "29/06/2026, 15:01"
+  "inicio_verificacao": "2026-06-30T13:56:09.969421-03:00",
+  "inicio_verificacao_formatada": "30/06/2026, 13:56",
+  "fim_verificacao": "2026-06-30T13:57:43.719074-03:00",
+  "fim_verificacao_formatada": "30/06/2026, 13:57"
 }
